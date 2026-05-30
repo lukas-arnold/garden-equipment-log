@@ -1,0 +1,33 @@
+{
+  "short_name": "Garden Equipment Log",
+  "name": "Garden Equipment Log",
+  "icons": [
+    {
+      "src": "/web/assets/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/web/assets/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "black",
+  "background_color": "white",
+  "screenshots": [
+    {
+      "src": "/web/assets/desktop.png",
+      "sizes": "1918x876",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/web/assets/mobile.jpg",
+      "sizes": "1080x2226",
+      "type": "image/png"
+    }
+  ]
+}

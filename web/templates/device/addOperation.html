@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang='{{T "language"}}'>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{T "addOperation"}}</title>
+  <link rel="icon" type="image/x-icon" href="/web/assets/favicon.ico">
+  <link rel="manifest" href="/web/manifest.json">
+  <link rel="stylesheet" href="/web/css/pico.min.css">
+  <link rel="stylesheet" href="/web/css/center.css">
+  <link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
+  <link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
+  <script src="/web/js/format.js" defer></script>
+  <script src="/web/js/today.js" defer></script>
+</head>
+
+<body>
+<header class="container">
+  <nav>
+    <ul>
+      <li><strong>Garden Equipment Log</strong></li>
+    </ul>
+    <ul>
+      <li><a href="/devices">{{T "devices"}}</a></li>
+      <li><a href="/bottles">{{T "bottles"}}</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="container">
+  <h1 class="center">{{T "addOperation"}}</h1>
+
+  <form action="/device-operation/add/{{.DeviceId}}" method="POST">
+    <label for="startTime">{{T "startTime"}}</label>
+    <input type="datetime-local" id="startTime" name="startTime" required>
+
+    <label for="endTime">{{T "endTime"}}</label>
+    <input type="datetime-local" id="endTime" name="endTime">
+
+    <label for="note">{{T "note"}}</label>
+    <input type="text" id="note" name="note" placeholder='{{T "note"}}'>
+
+    <input type="submit" value='{{T "save"}}' />
+  </form>
+</main>
+</body>
+</html>

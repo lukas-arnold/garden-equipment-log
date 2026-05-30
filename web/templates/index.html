@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang='{{T "language"}}'>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{T "title"}}</title>
+  <link rel="icon" type="image/x-icon" href="/web/assets/favicon.ico">
+  <link rel="manifest" href="/web/manifest.json">
+  <link rel="stylesheet" href="/web/css/pico.min.css">
+  <link rel="stylesheet" href="/web/css/center.css">
+</head>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker")
+    .catch(err => console.error("Service Worker failed", err));
+}
+</script>
+
+<body>
+
+  <header class="container">
+    <nav>
+      <ul>
+        <li><strong>Garden Equipment Log</strong></li>
+      </ul>
+      <ul>
+        <li><a href="/devices">{{T "devices"}}</a></li>
+        <li><a href="/bottles">{{T "bottles"}}</a></li>
+      </ul>
+    </nav>
+  </header>
+
+</body>
+
+</html>
