@@ -102,7 +102,7 @@ func latestDeviceOperationTimestamp(device models.Device) string {
 	if len(device.OperationHistory) == 0 {
 		return device.PurchaseDate
 	}
-	lastOp := device.OperationHistory[len(device.OperationHistory)-1]
+	lastOp := device.OperationHistory[0]
 	if lastOp.EndTime != "" {
 		return lastOp.EndTime
 	}

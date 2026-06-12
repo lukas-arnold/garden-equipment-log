@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     formatDates();
     formatDatetimes();
     formatFloats();
+    formatBottlePurchase();
 });
 
 function formatDates() {
@@ -32,6 +33,16 @@ function formatFloats() {
         if (!isNaN(value)) {
             element.textContent = value.toLocaleString("de-DE", {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
+    });
+}
+
+function formatBottlePurchase() {
+    const dateElements = document.querySelectorAll(".bottle-purchase-date");
+    
+    dateElements.forEach(element => {
+        const originalDate = new Date(element.textContent);
+        const options = {year: "numeric", month: "2-digit"};
+        element.textContent = originalDate.toLocaleDateString("de-DE", options);
     });
 }
 

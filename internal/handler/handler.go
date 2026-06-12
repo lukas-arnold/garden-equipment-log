@@ -56,20 +56,11 @@ func getTemplateFuncs() template.FuncMap {
 		"formatEuro": func(value float64) string {
 			return strings.ReplaceAll(fmt.Sprintf("%.2f €", value), ".", ",")
 		},
-		"formatDate": formatDate,
 	}
 }
 
 func parseDate(value string) (time.Time, error) {
 	return time.Parse("2006-01-02", value)
-}
-
-func formatDate(value string) string {
-	t, err := parseDate(value)
-	if err != nil {
-		return value
-	}
-	return t.Format("02.01.2006")
 }
 
 func parseDateTime(value string) (time.Time, error) {
@@ -130,30 +121,49 @@ func bottleContentFromWeight(weight, minW, maxW float64) float64 {
 
 func buildBottleHistoryData(bottle models.Bottle) ([]bottleOperationMetric, float64, float64, float64) {
 	operations := append([]models.BottleOperation(nil), bottle.OperationHistory...)
+
 	sort.SliceStable(operations, func(i, j int) bool {
 		return operations[i].Date < operations[j].Date
 	})
-	emptyWeight, capacity := bottleMinMaxWeights(bottle)
-	prevContent := capacity
-	var rows []bottleOperationMetric
+
+	emptyBottleWeight, fillingWeight := bottleMinMaxWeights(bottle)
+
+	rows := []bottleOperationMetric{}
+	prevWeight := fillingWeight
+
 	for _, op := range operations {
-		currentContent := bottleContentFromWeight(op.Weight, emptyWeight, capacity)
+		weight := bottleContentFromWeight(op.Weight, emptyBottleWeight, fillingWeight)
+
 		usedGas := 0.0
-		if prevContent > currentContent {
-			usedGas = prevContent - currentContent
+		if weight < prevWeight {
+			usedGas = prevWeight - weight
 		}
-		rows = append(rows, bottleOperationMetric{BottleOperation: op, RestGas: currentContent, UsedGas: usedGas})
-		prevContent = currentContent
+
+		rows = append(rows, bottleOperationMetric{
+			BottleOperation: op,
+			RestGas:         weight,
+			UsedGas:         usedGas,
+		})
+
+		prevWeight = weight
 	}
-	latestContent := 0.0
+
+	latestweight := 0.0
 	if len(operations) > 0 {
-		latestContent = bottleContentFromWeight(operations[len(operations)-1].Weight, emptyWeight, capacity)
+		last := operations[len(operations)-1]
+		latestweight = bottleContentFromWeight(last.Weight, emptyBottleWeight, fillingWeight)
 	}
-	totalUsed := capacity - latestContent
+
+	totalUsed := fillingWeight - latestweight
 	if totalUsed < 0 {
 		totalUsed = 0
 	}
-	return rows, totalUsed, latestContent, emptyWeight
+
+	sort.SliceStable(rows, func(i, j int) bool {
+		return rows[i].Date > rows[j].Date
+	})
+
+	return rows, totalUsed, latestweight, emptyBottleWeight
 }
 
 func HandleFiles(w http.ResponseWriter, r *http.Request) {

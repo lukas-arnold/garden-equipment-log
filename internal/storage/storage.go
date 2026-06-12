@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"math"
 	"os"
 	"sort"
 
@@ -101,44 +100,10 @@ func calculateBottleFillLevel(bottle models.Bottle) float64 {
 		currentWeight = getLatestBottleWeight(bottle)
 	}
 
-	minW := math.Min(bottle.InitialWeight, bottle.FillingWeight)
-	maxW := math.Max(bottle.InitialWeight, bottle.FillingWeight)
-	if maxW == minW {
-		return 0
-	}
-	capacity := maxW - minW
+	bottleWeight := bottle.InitialWeight - bottle.FillingWeight
+	currentFillingWeight := currentWeight - bottleWeight
 
-	// If operation weights are recorded as content volume (not total mass), detect
-	// and interpret latest weight as content when it's <= capacity.
-	if capacity > 0 && len(bottle.OperationHistory) > 0 {
-		latest := getLatestBottleWeight(bottle)
-		if latest <= capacity {
-			// latest is content weight
-			level := (latest / capacity) * 100
-			if level < 0 {
-				return 0
-			}
-			if level > 100 {
-				return 100
-			}
-			return level
-		}
-	}
-
-	if currentWeight < minW {
-		currentWeight = minW
-	}
-	if currentWeight > maxW {
-		currentWeight = maxW
-	}
-	level := (currentWeight - minW) / (maxW - minW) * 100
-	if level < 0 {
-		return 0
-	}
-	if level > 100 {
-		return 100
-	}
-	return level
+	return currentFillingWeight / bottle.FillingWeight * 100
 }
 
 func getLatestBottleWeight(bottle models.Bottle) float64 {

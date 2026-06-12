@@ -30,7 +30,10 @@
     <h1>{{T "operations"}}</h1>
   </div>
   <div class="center">
-    <h2>{{T "bottle"}} ({{formatDate .Bottle.PurchaseDate}})</h2>
+    <h2>{{T "bottle"}}</h2>
+  </div>
+  <div class="center">
+    <h3 class="bottle-purchase-date">{{.Bottle.PurchaseDate}}</h3>
   </div>
 
   <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin:1rem 0;">
@@ -68,8 +71,8 @@
       <tbody>
         {{range .OperationRows}}
         <tr>
-          <td><div class="date">{{formatDate .Date}}</div></td>
-          <td><span class="float-value">{{formatFloat .Weight 1}}</span> kg</td>
+          <td><div class="date">{{.Date}}</div></td>
+          <td>{{formatFloat .Weight 1}}</span> kg</td>
           <td>{{formatFloat .RestGas 1}} kg</td>
           <td>{{formatFloat .UsedGas 1}} kg</td>
           <td>
@@ -128,7 +131,7 @@
           callbacks: {
             title: (tooltipItem) => formatDate(tooltipItem[0].label),
             label: (tooltipItem) => {
-              const value = Number(tooltipItem.formattedValue);
+              const value = Number(tooltipItem.raw);
               const formatted = Number.isInteger(value)
                 ? value.toLocaleString('de-DE')
                 : value.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
