@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>{{T "devices"}}</title>
+		<title>{{T "title"}}</title>
 		<link rel="icon" type="image/x-icon" href="/web/assets/favicon.ico">
 		<link rel="manifest" href="/web/manifest.json">
 		<link rel="stylesheet" href="/web/css/pico.min.css">
@@ -17,7 +17,7 @@
 		<header class="container">
 			<nav>
 				<ul>
-					<li><strong>Garden Equipment Log</strong></li>
+					<li><strong>{{T "title"}}<strong></li>
 				</ul>
 				<ul>
 					<li><a href="/devices">{{T "devices"}}</a></li>
@@ -52,13 +52,13 @@
 							<td>
 								<article>
 									<form action="/device-operation/add/{{.Id}}">
-										<button type="submit" title="{{T "addOperation"}}" class="secondary"><i class="fa-solid fa-plus"></i></button>
+										<button type="submit" class="secondary"><i class="fa-solid fa-plus"></i></button>
 									</form>
 									<form action="/device/edit/{{.Id}}">
 										<button type="submit" class="secondary"><i class="fa-solid fa-pen"></i></button>
 									</form>
 									<form action="/device/history/{{.Id}}">
-										<button type="submit" title="{{T "chart"}}"><i class="fa-solid fa-clock-rotate-left"></i></button>
+										<button type="submit"><i class="fa-solid fa-clock-rotate-left"></i></button>
 									</form>
 									<form action="/device/delete/{{.Id}}">
 										<button type="submit" class="contrast"><i class="fa-solid fa-trash"></i></button>

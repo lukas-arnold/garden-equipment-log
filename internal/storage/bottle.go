@@ -9,7 +9,7 @@ import (
 )
 
 func AddBottle(bottle models.BottleInput) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func AddBottle(bottle models.BottleInput) error {
 }
 
 func GetBottles() ([]models.Bottle, error) {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +47,23 @@ func GetBottle(id int64) (models.Bottle, error) {
 	return bottle, nil
 }
 
+func GetBottleIdByOperationId(id int64) (int64, error) {
+	storage, err := getEquipmentStorage()
+	if err != nil {
+		return 0, err
+	}
+	for _, bottle := range storage.Bottles {
+		for _, operation := range bottle.OperationHistory {
+			if operation.Id == id {
+				return bottle.Id, nil
+			}
+		}
+	}
+	return 0, err
+}
+
 func UpdateBottle(bottle models.Bottle) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -69,7 +84,7 @@ func UpdateBottle(bottle models.Bottle) error {
 }
 
 func DeleteBottle(id int64) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -89,25 +104,13 @@ func DeleteBottle(id int64) error {
 
 func enrichBottle(bottle *models.Bottle) {
 	bottle.TotalOperations = len(bottle.OperationHistory)
-	if bottle.FillingWeight <= 0 {
-		return
-	}
-	usedGas := bottle.FillingWeight
+	usedGas := 0.0
 	if len(bottle.OperationHistory) > 0 {
-		sort.Slice(bottle.OperationHistory, func(i, j int) bool {
-			return bottle.OperationHistory[i].Date > bottle.OperationHistory[j].Date
-		})
 		lastWeight := bottle.OperationHistory[0].Weight
 		usedGas = bottle.InitialWeight - lastWeight
-		if usedGas < 0 {
-			usedGas = 0
-		}
 	}
 	bottle.UsedGas = usedGas
 	bottle.RestGas = bottle.FillingWeight - usedGas
-	if bottle.UsedGas < 0 {
-		bottle.UsedGas = 0
-	}
 }
 
 func sortBottles(bottles []models.Bottle) []models.Bottle {

@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 
@@ -39,24 +38,8 @@ func GetBottleOperation(id int64) (models.BottleOperation, error) {
 	return operation, nil
 }
 
-func DeleteBottleOperation(id int64) error {
-	storage, err := GetEquipmentStorage()
-	if err != nil {
-		return err
-	}
-	for i := range storage.Bottles {
-		for j := range storage.Bottles[i].OperationHistory {
-			if storage.Bottles[i].OperationHistory[j].Id == id {
-				storage.Bottles[i].OperationHistory = slices.Delete(storage.Bottles[i].OperationHistory, j, j+1)
-				return saveStorage(storage)
-			}
-		}
-	}
-	return nil
-}
-
 func UpdateBottleOperation(id int64, operationInput models.BottleOperationInput) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -72,19 +55,20 @@ func UpdateBottleOperation(id int64, operationInput models.BottleOperationInput)
 	return nil
 }
 
-func GetBottleIdByOperationId(id int64) (int64, error) {
-	storage, err := GetEquipmentStorage()
+func DeleteBottleOperation(id int64) error {
+	storage, err := getEquipmentStorage()
 	if err != nil {
-		return 0, err
+		return err
 	}
-	for _, bottle := range storage.Bottles {
-		for _, operation := range bottle.OperationHistory {
-			if operation.Id == id {
-				return bottle.Id, nil
+	for i := range storage.Bottles {
+		for j := range storage.Bottles[i].OperationHistory {
+			if storage.Bottles[i].OperationHistory[j].Id == id {
+				storage.Bottles[i].OperationHistory = slices.Delete(storage.Bottles[i].OperationHistory, j, j+1)
+				return saveStorage(storage)
 			}
 		}
 	}
-	return 0, fmt.Errorf("bottle operation %d not found", id)
+	return nil
 }
 
 func sortBottleOperations(operations []models.BottleOperation) []models.BottleOperation {

@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 
@@ -40,7 +39,7 @@ func GetDeviceOperation(id int64) (models.DeviceOperation, error) {
 }
 
 func DeleteDeviceOperation(id int64) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -56,7 +55,7 @@ func DeleteDeviceOperation(id int64) error {
 }
 
 func UpdateDeviceOperation(id int64, operationInput models.DeviceOperationInput) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -71,21 +70,6 @@ func UpdateDeviceOperation(id int64, operationInput models.DeviceOperationInput)
 		}
 	}
 	return nil
-}
-
-func GetDeviceIdByOperationId(id int64) (int64, error) {
-	storage, err := GetEquipmentStorage()
-	if err != nil {
-		return 0, err
-	}
-	for _, device := range storage.Devices {
-		for _, operation := range device.OperationHistory {
-			if operation.Id == id {
-				return device.Id, nil
-			}
-		}
-	}
-	return 0, fmt.Errorf("device operation %d not found", id)
 }
 
 func sortDeviceOperations(operations []models.DeviceOperation) []models.DeviceOperation {

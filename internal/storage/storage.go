@@ -2,7 +2,6 @@ package storage
 
 import (
 	"os"
-	"sort"
 
 	"github.com/lukas-arnold/garden-equipment-log/internal/configs"
 	"github.com/lukas-arnold/garden-equipment-log/internal/models"
@@ -38,7 +37,7 @@ func checkStorage() {
 	}
 }
 
-func GetEquipmentStorage() (models.EquipmentStorage, error) {
+func getEquipmentStorage() (models.EquipmentStorage, error) {
 	bytes, err := readStorage()
 	if err != nil {
 		return models.EquipmentStorage{}, err
@@ -48,75 +47,7 @@ func GetEquipmentStorage() (models.EquipmentStorage, error) {
 		return models.EquipmentStorage{}, err
 	}
 	storage = sortStorage(storage)
-	// for i := range storage.Bottles {
-	// 	storage.Bottles[i].RemainingGas = storage.Bottles[i].InitialWeight - getLatestBottleWeight(storage.Bottles[i])
-	// 	storage.Bottles[i].CurrentFillLevel = calculateBottleFillLevel(storage.Bottles[i])
-	// }
-	// for i := range storage.Devices {
-	// 	storage.Devices[i].LastUsageDate = latestDeviceOperationTimestamp(storage.Devices[i])
-	// 	storage.Devices[i].TotalOperations = calculateDeviceTotalOperations(storage.Devices[i])
-	// 	storage.Devices[i].TotalOperationHours = calculateDeviceTotalOperationHours(storage.Devices[i])
-	// 	storage.Devices[i].PricePerHour = calculateDevicePricePerHour(storage.Devices[i])
-	// }
 	return storage, nil
-}
-
-func calculateDeviceTotalOperations(device models.Device) int {
-	return len(device.OperationHistory)
-}
-
-func calculateDeviceTotalOperationHours(device models.Device) float64 {
-	totalHours := 0.0
-	for _, operation := range device.OperationHistory {
-		if operation.StartTime == "" || operation.EndTime == "" {
-			continue
-		}
-		start, err := parseDateTime(operation.StartTime)
-		if err != nil {
-			continue
-		}
-		end, err := parseDateTime(operation.EndTime)
-		if err != nil {
-			continue
-		}
-		duration := end.Sub(start).Hours()
-		if duration > 0 {
-			totalHours += duration
-		}
-	}
-	return totalHours
-}
-
-func calculateDevicePricePerHour(device models.Device) float64 {
-	totalHours := calculateDeviceTotalOperationHours(device)
-	if totalHours <= 0 {
-		return 0
-	}
-	return device.PurchasePrice / totalHours
-}
-
-func calculateBottleFillLevel(bottle models.Bottle) float64 {
-	currentWeight := bottle.InitialWeight
-	if len(bottle.OperationHistory) > 0 {
-		currentWeight = getLatestBottleWeight(bottle)
-	}
-
-	bottleWeight := bottle.InitialWeight - bottle.FillingWeight
-	currentFillingWeight := currentWeight - bottleWeight
-
-	return currentFillingWeight / bottle.FillingWeight * 100
-}
-
-func getLatestBottleWeight(bottle models.Bottle) float64 {
-	currentWeight := bottle.InitialWeight
-	if len(bottle.OperationHistory) == 0 {
-		return currentWeight
-	}
-	operations := append([]models.BottleOperation(nil), bottle.OperationHistory...)
-	sort.Slice(operations, func(i, j int) bool {
-		return operations[i].Date > operations[j].Date
-	})
-	return operations[0].Weight
 }
 
 func sortStorage(storage models.EquipmentStorage) models.EquipmentStorage {

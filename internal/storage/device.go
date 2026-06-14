@@ -10,7 +10,7 @@ import (
 )
 
 func AddDevice(device models.DeviceInput) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func AddDevice(device models.DeviceInput) error {
 }
 
 func GetDevices() ([]models.Device, error) {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +48,23 @@ func GetDevice(id int64) (models.Device, error) {
 	return device, nil
 }
 
+func GetDeviceIdByOperationId(id int64) (int64, error) {
+	storage, err := getEquipmentStorage()
+	if err != nil {
+		return 0, err
+	}
+	for _, device := range storage.Devices {
+		for _, operation := range device.OperationHistory {
+			if operation.Id == id {
+				return device.Id, nil
+			}
+		}
+	}
+	return 0, err
+}
+
 func UpdateDevice(device models.Device) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -69,7 +84,7 @@ func UpdateDevice(device models.Device) error {
 }
 
 func DeleteDevice(id int64) error {
-	storage, err := GetEquipmentStorage()
+	storage, err := getEquipmentStorage()
 	if err != nil {
 		return err
 	}
@@ -92,22 +107,12 @@ func enrichDevice(device *models.Device) {
 	var totalHours float64
 	var lastUsage time.Time
 	for _, op := range device.OperationHistory {
-		if op.StartTime == "" || op.EndTime == "" {
+		start, err1 := utils.ParseDateTime(op.StartTime)
+		end, err2 := utils.ParseDateTime(op.EndTime)
+		if err1 != nil || err2 != nil {
 			continue
 		}
-		start, err := time.Parse("2006-01-02T15:04", op.StartTime)
-		if err != nil {
-			continue
-		}
-		end, err := time.Parse("2006-01-02T15:04", op.EndTime)
-		if err != nil {
-			continue
-		}
-		hours := end.Sub(start).Hours()
-		if hours < 0 {
-			hours = 0
-		}
-		totalHours += hours
+		totalHours += max(0, end.Sub(start).Hours())
 		if start.After(lastUsage) {
 			lastUsage = start
 		}
@@ -117,7 +122,7 @@ func enrichDevice(device *models.Device) {
 		device.PricePerHour = device.PurchasePrice / totalHours
 	}
 	if !lastUsage.IsZero() {
-		device.LastUsageDate = lastUsage.Format("2006-01-02")
+		device.LastUsageDate = lastUsage.Format(time.DateOnly)
 	}
 }
 

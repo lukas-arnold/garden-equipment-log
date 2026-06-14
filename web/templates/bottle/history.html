@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>{{T "bottle"}} {{T "weight"}}</title>
+		<title>{{T "title"}}</title>
 		<link rel="stylesheet" href="/web/css/pico.min.css">
 		<link rel="stylesheet" href="/web/css/style.css">
 		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
@@ -16,7 +16,7 @@
 		<header class="container">
 			<nav>
 				<ul>
-					<li><strong>Garden Equipment Log</strong></li>
+					<li><strong>{{T "title"}}<strong></li>
 				</ul>
 				<ul>
 					<li><a href="/devices">{{T "devices"}}</a></li>
@@ -36,16 +36,16 @@
 			</div>
 			<div class="grid">
 				<article class="card">
-					<strong class="center">{{T "totalUsedGas"}}</strong>
-					<div class="center">{{formatFloat .TotalUsedGas 1}} kg</div>
+					<strong class="center">{{T "usedGas"}}</strong>
+					<div class="center">{{formatFloat .Bottle.UsedGas 1}} kg</div>
 				</article>
 				<article class="card">
 					<strong class="center">{{T "restGas"}}</strong>
-					<div class="center">{{formatFloat .TotalRestGas 1}} kg</div>
+					<div class="center">{{formatFloat .Bottle.RestGas 1}} kg</div>
 				</article>
 				<article class="card">
 					<strong class="center">{{T "totalOperations"}}</strong>
-					<div class="center">{{.TotalOperations}}</div>
+					<div class="center">{{.Bottle.TotalOperations}}</div>
 				</article>
 				<article class="card">
 					<strong class="center">{{T "fillLevel"}}</strong>
@@ -70,7 +70,7 @@
 							<td>
 								<div class="date">{{.Date}}</div>
 							</td>
-							<td>{{formatFloat .Weight 1}}</span> kg</td>
+							<td>{{formatFloat .BottleOperation.Weight 1}}</span> kg</td>
 							<td>{{formatFloat .RestGas 1}} kg</td>
 							<td>{{formatFloat .UsedGas 1}} kg</td>
 							<td>
