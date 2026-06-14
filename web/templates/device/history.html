@@ -1,99 +1,65 @@
-<!DOCTYPE html>
-<html lang='{{T "language"}}'>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>{{T "title"}}</title>
-		<link rel="stylesheet" href="/web/css/pico.min.css">
-		<link rel="stylesheet" href="/web/css/style.css">
-		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
-		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
-		<script src="/web/js/chart.min.js"></script>
-		<script src="/web/js/format.js" defer></script>
-		<script src="/web/js/chartSettings.js"></script>
-	</head>
-	<body>
-		<header class="container">
-			<nav>
-				<ul>
-					<li><strong>{{T "title"}}<strong></li>
-				</ul>
-				<ul>
-					<li><a href="/devices">{{T "devices"}}</a></li>
-					<li><a href="/bottles">{{T "bottles"}}</a></li>
-				</ul>
-			</nav>
-		</header>
-		<main class="container-fluid">
-			<div class="center">
-				<h1>{{T "operations"}}</h1>
-			</div>
-			<div class="center">
-				<h2>{{.Device.Name}}</h2>
-			</div>
-			<div class="grid">
-				<article class="card">
-					<strong class="center">{{T "operationCount"}}</strong>
-					<div class="center">{{.Device.TotalOperations}}</div>
-				</article>
-				<article class="card">
-					<strong class="center">{{T "operationHours"}}</strong>
-					<div class="center">{{formatFloat .Device.TotalOperationHours 1}} {{T "hours"}}</div>
-				</article>
-				<article class="card">
-					<strong class="center">{{T "pricePerHour"}}</strong>
-					<div class="center">{{formatEuro .Device.PricePerHour}}</div>
-				</article>
-			</div>
-			<canvas id="operationChart"></canvas>
-			<div>
-				<table>
-					<thead>
-						<tr>
-							<th>{{T "date"}}</th>
-							<th>{{T "note"}}</th>
-							<th>{{T "operationMinutes"}}</th>
-							<th>{{T "action"}}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{{range .OperationRows}}
-						<tr>
-							<td>
-								<span class="datetime">{{.StartTime}}</span><br />
-								<span class="datetime">{{.EndTime}}</span>
-							</td>
-							<td>
-								{{.Note}}
-							</td>
-							<td>
-								{{formatFloat .Minutes 0}} min
-							</td>
-							<td>
-								<article>
-									<form action="/device-operation/edit/{{.Id}}">
-										<button type="submit" class="secondary">
-										<i class="fa-solid fa-pen"></i>
-										</button>
-									</form>
-									<form action="/device-operation/delete/{{.Id}}">
-										<button type="submit" class="contrast">
-										<i class="fa-solid fa-trash"></i>
-										</button>
-									</form>
-								</article>
-							</td>
-						</tr>
-						{{end}}
-					</tbody>
-				</table>
-			</div>
-		</main>
-		<script>
-			renderChart(
-			  "operationChart",
-			  {{ .Chart }}
-			);
-		</script>
-	</body>
-</html>
+{{define "historyTemplate"}}
+<div class="center">
+	<h1>{{T "operations"}}</h1>
+</div>
+<div class="center">
+	<h2>{{.Device.Name}}</h2>
+</div>
+<div class="grid">
+	<article class="card">
+		<strong class="center">{{T "operationCount"}}</strong>
+		<div class="center">{{.Device.TotalOperations}}</div>
+	</article>
+	<article class="card">
+		<strong class="center">{{T "operationHours"}}</strong>
+		<div class="center">{{formatFloat .Device.TotalOperationHours 1}} {{T "hours"}}</div>
+	</article>
+	<article class="card">
+		<strong class="center">{{T "pricePerHour"}}</strong>
+		<div class="center">{{formatEuro .Device.PricePerHour}}</div>
+	</article>
+</div>
+<canvas id="chart"></canvas>
+<div>
+	<table>
+		<thead>
+			<tr>
+				<th>{{T "date"}}</th>
+				<th>{{T "note"}}</th>
+				<th>{{T "operationMinutes"}}</th>
+				<th>{{T "action"}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{range .OperationRows}}
+			<tr>
+				<td>
+					<span class="datetime">{{.StartTime}}</span><br />
+					<span class="datetime">{{.EndTime}}</span>
+				</td>
+				<td>
+					{{.Note}}
+				</td>
+				<td>
+					{{formatFloat .Minutes 0}} min
+				</td>
+				<td>
+					<article>
+						<form action="/device-operation/edit/{{.Id}}">
+							<button type="submit" class="secondary">
+							<i class="fa-solid fa-pen"></i>
+							</button>
+						</form>
+						<form action="/device-operation/delete/{{.Id}}">
+							<button type="submit" class="contrast">
+							<i class="fa-solid fa-trash"></i>
+							</button>
+						</form>
+					</article>
+				</td>
+			</tr>
+			{{end}}
+		</tbody>
+	</table>
+</div>
+{{end}}

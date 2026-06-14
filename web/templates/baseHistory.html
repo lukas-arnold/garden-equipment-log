@@ -8,6 +8,11 @@
 		<link rel="manifest" href="/web/manifest.json">
 		<link rel="stylesheet" href="/web/css/pico.min.css">
 		<link rel="stylesheet" href="/web/css/style.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
+		<script src="/web/js/format.js" defer></script>
+		<script src="/web/js/chart.min.js"></script>
+		<script src="/web/js/chartSettings.js"></script>
 	</head>
 	<script>
 		if ("serviceWorker" in navigator) {
@@ -16,7 +21,7 @@
 		}
 	</script>
 	<body>
-		<header class="container">
+		<header class="container-fluid">
 			<nav>
 				<ul>
 					<li><strong>Garden Equipment Log</strong></li>
@@ -27,5 +32,14 @@
 				</ul>
 			</nav>
 		</header>
+		<main class="container-fluid">
+			{{template "historyTemplate" .}}
+		</main>
+		<script>
+			renderChart(
+			  "chart",
+			  {{ .Chart }}
+			);
+		</script>
 	</body>
 </html>

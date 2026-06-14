@@ -13,7 +13,7 @@ import (
 
 func HandleBottlesView(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
-		template.New("index.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/index.html"),
+		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/index.html"),
 	)
 	bottles, err := storage.GetBottles()
 	if err != nil {
@@ -34,7 +34,7 @@ func HandleAddBottleOperationGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tmpl := template.Must(
-		template.New("addOperation.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/addOperation.html"),
+		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/addOperation.html"),
 	)
 	err = tmpl.Execute(w, struct {
 		BottleId int64
@@ -84,7 +84,7 @@ func HandleEditBottleOperation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tmpl := template.Must(
-		template.New("editOperation.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/editOperation.html"),
+		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/editOperation.html"),
 	)
 	err = tmpl.Execute(w, struct {
 		BottleId  int64

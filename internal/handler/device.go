@@ -32,7 +32,7 @@ type deviceHistoryPageData struct {
 
 func HandleDevicesView(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
-		template.New("index.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/index.html"),
+		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/device/index.html"),
 	)
 	devices, err := storage.GetDevices()
 	if err != nil {
@@ -48,11 +48,11 @@ func HandleDevicesView(w http.ResponseWriter, r *http.Request) {
 
 func HandleAddDeviceGet(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
-		template.New("add.html").Funcs(template.FuncMap{
+		template.New("base.html").Funcs(template.FuncMap{
 			"T": func(key string) string {
 				return language.T(configs.GetLanguage(), key)
 			},
-		}).ParseFS(configs.GetWebFiles(), "templates/device/add.html"),
+		}).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/device/add.html"),
 	)
 	err := tmpl.Execute(w, deviceFormData{
 		Title:       language.T(configs.GetLanguage(), "addDevice"),
@@ -86,11 +86,11 @@ func HandleAddDevicePost(w http.ResponseWriter, r *http.Request) {
 
 func HandleEditDevice(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
-		template.New("add.html").Funcs(template.FuncMap{
+		template.New("base.html").Funcs(template.FuncMap{
 			"T": func(key string) string {
 				return language.T(configs.GetLanguage(), key)
 			},
-		}).ParseFS(configs.GetWebFiles(), "templates/device/add.html"),
+		}).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/device/add.html"),
 	)
 	id, err := utils.ConvertId(r.PathValue("id"))
 	if err != nil {
@@ -178,10 +178,11 @@ func HandleDeviceHistory(w http.ResponseWriter, r *http.Request) {
 		OperationRows: rows,
 	}
 	tmpl := template.Must(
-		template.New("history.html").
+		template.New("baseHistory.html").
 			Funcs(getTemplateFuncs()).
 			ParseFS(
 				configs.GetWebFiles(),
+				"templates/baseHistory.html",
 				"templates/device/history.html",
 			),
 	)

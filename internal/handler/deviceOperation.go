@@ -18,7 +18,7 @@ func HandleAddDeviceOperationGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tmpl := template.Must(
-		template.New("addOperation.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/addOperation.html"),
+		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/device/addOperation.html"),
 	)
 	err = tmpl.Execute(w, struct{ DeviceId int64 }{DeviceId: deviceId})
 	if err != nil {
@@ -62,7 +62,7 @@ func HandleEditDeviceOperation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tmpl := template.Must(
-		template.New("editOperation.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/editOperation.html"),
+		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/device/editOperation.html"),
 	)
 	err = tmpl.Execute(w, struct {
 		DeviceId  int64

@@ -34,11 +34,11 @@ type bottleHistoryPageData struct {
 
 func HandleAddBottleGet(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
-		template.New("add.html").Funcs(template.FuncMap{
+		template.New("base.html").Funcs(template.FuncMap{
 			"T": func(key string) string {
 				return language.T(configs.GetLanguage(), key)
 			},
-		}).ParseFS(configs.GetWebFiles(), "templates/bottle/add.html"),
+		}).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/add.html"),
 	)
 	err := tmpl.Execute(w, bottleFormData{
 		Title:       language.T(configs.GetLanguage(), "addBottle"),
@@ -83,11 +83,11 @@ func HandleAddBottlePost(w http.ResponseWriter, r *http.Request) {
 
 func HandleEditBottle(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
-		template.New("add.html").Funcs(template.FuncMap{
+		template.New("base.html").Funcs(template.FuncMap{
 			"T": func(key string) string {
 				return language.T(configs.GetLanguage(), key)
 			},
-		}).ParseFS(configs.GetWebFiles(), "templates/bottle/add.html"),
+		}).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/add.html"),
 	)
 	id, err := utils.ConvertId(r.PathValue("id"))
 	if err != nil {
@@ -188,10 +188,11 @@ func HandleBottleHistory(w http.ResponseWriter, r *http.Request) {
 		FillLevel:     fillLevel,
 	}
 	tmpl := template.Must(
-		template.New("history.html").
+		template.New("baseHistory.html").
 			Funcs(getTemplateFuncs()).
 			ParseFS(
 				configs.GetWebFiles(),
+				"templates/baseHistory.html",
 				"templates/bottle/history.html",
 			),
 	)

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang='{{T "language"}}'>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{T "title"}}</title>
+		<link rel="icon" type="image/x-icon" href="/web/assets/favicon.ico">
+		<link rel="manifest" href="/web/manifest.json">
+		<link rel="stylesheet" href="/web/css/pico.min.css">
+		<link rel="stylesheet" href="/web/css/style.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
+		<script src="/web/js/format.js" defer></script>
+		<script src="/web/js/today.js" defer></script>
+	</head>
+	<script>
+		if ("serviceWorker" in navigator) {
+		  navigator.serviceWorker.register("/service-worker")
+		    .catch(err => console.error("Service Worker failed", err));
+		}
+	</script>
+	<body>
+		<header class="container-fluid">
+			<nav>
+				<ul>
+					<li><strong>Garden Equipment Log</strong></li>
+				</ul>
+				<ul>
+					<li><a href="/devices">{{T "devices"}}</a></li>
+					<li><a href="/bottles">{{T "bottles"}}</a></li>
+				</ul>
+			</nav>
+		</header>
+		<main class="container-fluid">
+			{{template "template" .}}
+		</main>
+		<script>
+			const canvas = document.getElementById("chart");
+			if (canvas && canvas.dataset.chart) {
+				renderChart("chart", JSON.parse(canvas.dataset.chart));
+			}
+		</script>
+	</body>
+</html>

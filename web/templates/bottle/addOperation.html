@@ -1,39 +1,10 @@
-<!DOCTYPE html>
-<html lang='{{T "language"}}'>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>{{T "title"}}</title>
-		<link rel="icon" type="image/x-icon" href="/web/assets/favicon.ico">
-		<link rel="manifest" href="/web/manifest.json">
-		<link rel="stylesheet" href="/web/css/pico.min.css">
-		<link rel="stylesheet" href="/web/css/style.css">
-		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
-		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
-		<script src="/web/js/format.js" defer></script>
-		<script src="/web/js/today.js" defer></script>
-	</head>
-	<body>
-		<header class="container">
-			<nav>
-				<ul>
-					<li><strong>{{T "title"}}<strong></li>
-				</ul>
-				<ul>
-					<li><a href="/devices">{{T "devices"}}</a></li>
-					<li><a href="/bottles">{{T "bottles"}}</a></li>
-				</ul>
-			</nav>
-		</header>
-		<main class="container">
-			<h1 class="center">{{T "addOperation"}}</h1>
-			<form action="/bottle-operation/add/{{.BottleId}}" method="POST">
-				<label for="date">{{T "date"}}</label>
-				<input type="date" id="date" name="date" required>
-				<label for="weight">{{T "weight"}}</label>
-				<input type="number" step="0.1" id="weight" name="weight" placeholder='{{T "weight"}}' required>
-				<input type="submit" value='{{T "save"}}' style="width: 100%;" />
-			</form>
-		</main>
-	</body>
-</html>
+{{define "template"}}
+<h1 class="center">{{T "addOperation"}}</h1>
+<form action="/bottle-operation/add/{{.BottleId}}" method="POST">
+	<label for="date">{{T "date"}}</label>
+	<input type="date" id="date" name="date" required>
+	<label for="weight">{{T "weight"}}</label>
+	<input type="number" step="0.1" id="weight" name="weight" placeholder='{{T "weight"}}' required>
+	<input type="submit" value='{{T "save"}}' style="width: 100%;" />
+</form>
+{{end}}
