@@ -30,8 +30,8 @@ func main() {
 	mux.HandleFunc("GET /device/delete/{id}", handler.HandleDeleteDevice)
 	mux.HandleFunc("GET /device/history/{id}", handler.HandleDeviceHistory)
 
-	mux.HandleFunc("GET /device-operation/add/{deviceId}", handler.HandleAddDeviceGetOperation)
-	mux.HandleFunc("POST /device-operation/add/{deviceId}", handler.HandleAddDevicePostOperation)
+	mux.HandleFunc("GET /device-operation/add/{deviceId}", handler.HandleAddDeviceOperationGet)
+	mux.HandleFunc("POST /device-operation/add/{deviceId}", handler.HandleAddDeviceOperationPost)
 	mux.HandleFunc("GET /device-operation/edit/{id}", handler.HandleEditDeviceOperation)
 	mux.HandleFunc("POST /device-operation/save/{id}", handler.HandleSaveDeviceOperation)
 	mux.HandleFunc("GET /device-operation/delete/{id}", handler.HandleDeleteDeviceOperation)

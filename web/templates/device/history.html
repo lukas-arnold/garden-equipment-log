@@ -1,142 +1,99 @@
 <!DOCTYPE html>
 <html lang='{{T "language"}}'>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{T "device"}} {{T "operations"}}</title>
-  <link rel="stylesheet" href="/web/css/pico.min.css">
-  <link rel="stylesheet" href="/web/css/center.css">
-  <link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
-  <link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
-  <script src="/web/js/chart.min.js"></script>
-  <script src="/web/js/format.js" defer></script>
-</head>
-<body>
-<header class="container">
-  <nav>
-    <ul>
-      <li><strong>Garden Equipment Log</strong></li>
-    </ul>
-    <ul>
-      <li><a href="/devices">{{T "devices"}}</a></li>
-      <li><a href="/bottles">{{T "bottles"}}</a></li>
-    </ul>
-  </nav>
-</header>
-
-<main class="container-fluid">
-  <div class="center">
-    <h1>{{T "operations"}}</h1>
-  </div>
-  <div class="center">
-    <h2>{{.Device.Name}}</h2>
-  </div>
-
-  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin:1rem 0;">
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "operationCount"}}</strong>
-      <div>{{.Device.TotalOperations}}</div>
-    </div>
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "operationHours"}}</strong>
-      <div>{{formatFloat .Device.TotalOperationHours 1}} {{T "hours"}}</div>
-    </div>
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "pricePerHour"}}</strong>
-      <div>{{formatEuro .Device.PricePerHour}}</div>
-    </div>
-  </div>
-
-  <canvas id="operationTimesChart" style="margin: 20px 0;"></canvas>
-
-  <div class="table-cards">
-    <table>
-      <thead>
-        <tr>
-          <th>{{T "time"}}</th>
-          <th>{{T "note"}}</th>
-          <th>{{T "operationMinutes"}}</th>
-          <th>{{T "action"}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{range $i, $operation := .Device.OperationHistory}}
-        <tr>
-          <td>
-            <span class="datetime">{{$operation.StartTime}}</span><br/>
-            <span class="datetime">{{$operation.EndTime}}</span>
-          </td>
-          <td>
-            {{$operation.Note}}
-          </td>
-          <td>{{formatFloat (index $.OperationMinutes $i) 0}} min</td>
-          <td>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <form action="/device-operation/edit/{{$operation.Id}}" style="margin:0;">
-                <button type="submit" class="secondary" style="width: 100%;"><i class="fa-solid fa-pen"></i></button>
-              </form>
-              <form action="/device-operation/delete/{{$operation.Id}}" style="margin:0;">
-                <button type="submit" class="contrast" style="width: 100%;"><i class="fa-solid fa-trash"></i></button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
-  </div>
-
-</main>
-
-<script>
-  function formatDuration(value) {
-    const num = parseFloat(value);
-    return isNaN(num) ? value : num.toFixed(0) + ' min';
-  }
-
-  const ctx = document.getElementById('operationTimesChart');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [{{range $i, $date := .Dates}}{{if $i}}, {{end}}"{{$date}}"{{end}}],
-      datasets: [{
-        label: '{{T "operationMinutes"}}',
-        data: [{{range $i, $duration := .Durations}}{{if $i}}, {{end}}{{$duration}}{{end}}],
-        borderWidth: 1,
-        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-        borderColor: 'rgb(75, 192, 192)'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        tooltip: {
-          callbacks: {
-            title: (tooltipItems) => tooltipItems[0].label,
-            label: (tooltipItem) => formatDuration(tooltipItem.raw)
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return value.toFixed(0) + ' min';
-            }
-          }
-        },
-        x: {
-          ticks: {
-            callback: function(value) {
-              return this.getLabelForValue(value);
-            }
-          }
-        }
-      }
-    }
-  });
-</script>
-
-</body>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{T "device"}} {{T "operations"}}</title>
+		<link rel="stylesheet" href="/web/css/pico.min.css">
+		<link rel="stylesheet" href="/web/css/style.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
+		<script src="/web/js/chart.min.js"></script>
+		<script src="/web/js/format.js" defer></script>
+		<script src="/web/js/chartSettings.js"></script>
+	</head>
+	<body>
+		<header class="container">
+			<nav>
+				<ul>
+					<li><strong>Garden Equipment Log</strong></li>
+				</ul>
+				<ul>
+					<li><a href="/devices">{{T "devices"}}</a></li>
+					<li><a href="/bottles">{{T "bottles"}}</a></li>
+				</ul>
+			</nav>
+		</header>
+		<main class="container-fluid">
+			<div class="center">
+				<h1>{{T "operations"}}</h1>
+			</div>
+			<div class="center">
+				<h2>{{.Device.Name}}</h2>
+			</div>
+			<div class="grid">
+				<article class="card">
+					<strong class="center">{{T "operationCount"}}</strong>
+					<div class="center">{{.Device.TotalOperations}}</div>
+				</article>
+				<article class="card">
+					<strong class="center">{{T "operationHours"}}</strong>
+					<div class="center">{{formatFloat .Device.TotalOperationHours 1}} {{T "hours"}}</div>
+				</article>
+				<article class="card">
+					<strong class="center">{{T "pricePerHour"}}</strong>
+					<div class="center">{{formatEuro .Device.PricePerHour}}</div>
+				</article>
+			</div>
+			<canvas id="operationChart"></canvas>
+			<div>
+				<table>
+					<thead>
+						<tr>
+							<th>{{T "time"}}</th>
+							<th>{{T "note"}}</th>
+							<th>{{T "operationMinutes"}}</th>
+							<th>{{T "action"}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{range .OperationRows}}
+						<tr>
+							<td>
+								<span class="datetime">{{.StartTime}}</span><br />
+								<span class="datetime">{{.EndTime}}</span>
+							</td>
+							<td>
+								{{.Note}}
+							</td>
+							<td>
+								{{formatFloat .Minutes 0}} min
+							</td>
+							<td>
+								<article>
+									<form action="/device-operation/edit/{{.Id}}">
+										<button type="submit" class="secondary">
+										<i class="fa-solid fa-pen"></i>
+										</button>
+									</form>
+									<form action="/device-operation/delete/{{.Id}}">
+										<button type="submit" class="contrast">
+										<i class="fa-solid fa-trash"></i>
+										</button>
+									</form>
+								</article>
+							</td>
+						</tr>
+						{{end}}
+					</tbody>
+				</table>
+			</div>
+		</main>
+		<script>
+			renderChart(
+			  "operationChart",
+			  {{ .Chart }}
+			);
+		</script>
+	</body>
+</html>

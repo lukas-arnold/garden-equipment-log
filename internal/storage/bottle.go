@@ -27,6 +27,9 @@ func GetBottles() ([]models.Bottle, error) {
 	if err != nil {
 		return nil, err
 	}
+	for i := range storage.Bottles {
+		enrichBottle(&storage.Bottles[i])
+	}
 	return storage.Bottles, nil
 }
 
@@ -82,6 +85,29 @@ func DeleteBottle(id int64) error {
 		return err
 	}
 	return nil
+}
+
+func enrichBottle(bottle *models.Bottle) {
+	bottle.TotalOperations = len(bottle.OperationHistory)
+	if bottle.FillingWeight <= 0 {
+		return
+	}
+	usedGas := bottle.FillingWeight
+	if len(bottle.OperationHistory) > 0 {
+		sort.Slice(bottle.OperationHistory, func(i, j int) bool {
+			return bottle.OperationHistory[i].Date > bottle.OperationHistory[j].Date
+		})
+		lastWeight := bottle.OperationHistory[0].Weight
+		usedGas = bottle.InitialWeight - lastWeight
+		if usedGas < 0 {
+			usedGas = 0
+		}
+	}
+	bottle.UsedGas = usedGas
+	bottle.RestGas = bottle.FillingWeight - usedGas
+	if bottle.UsedGas < 0 {
+		bottle.UsedGas = 0
+	}
 }
 
 func sortBottles(bottles []models.Bottle) []models.Bottle {

@@ -5,28 +5,14 @@ type EquipmentStorage struct {
 	Bottles []Bottle `json:"Bottles"`
 }
 
-type DevicesForChart struct {
-	Devices []Device
-	Labels  []string
-	Hours   [][]float64
+type ChartDataset struct {
+	Label string    `json:"label"`
+	Data  []float64 `json:"data"`
+	Unit  string    `json:"unit"`
 }
 
-type BottlesForChart struct {
-	Bottles     []Bottle
-	Names       []string
-	LastWeights []float64
-	Dates       []string
-	Weights     [][]float64
-}
-
-type DeviceOperationTimesForChart struct {
-	Device    Device
-	Dates     []string
-	Durations []float64
-}
-
-type BottleWeightHistoryForChart struct {
-	Bottle  Bottle
-	Dates   []string
-	Weights []float64
+type ChartModel struct {
+	Type   string         `json:"type,omitempty"`
+	Labels []string       `json:"labels"`
+	Sets   []ChartDataset `json:"sets"`
 }

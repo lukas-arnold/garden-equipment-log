@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html lang='{{T "language"}}'>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{T "editDevice"}}</title>
-  <link rel="stylesheet" href="/web/css/pico.min.css">
-</head>
-
-<body>
-<header class="container">
-  <nav>
-    <ul>
-      <li><strong>Garden Equipment Log</strong></li>
-    </ul>
-    <ul>
-      <li><a href="/devices">{{T "devices"}}</a></li>
-      <li><a href="/bottles">{{T "bottles"}}</a></li>
-    </ul>
-  </nav>
-</header>
-
-  <main class="container">
-    <h1>{{T "editDevice"}}</h1>
-    <form action="/device/save/{{.Id}}" method="POST">
-      <input type="text" name="name" value="{{.Name}}" placeholder='{{T "name"}}' required>
-      <input type="date" name="purchaseDate" value="{{.PurchaseDate}}" required>
-      <input type="number" step="0.01" name="purchasePrice" value="{{.PurchasePrice}}" placeholder='{{T "purchasePrice"}}' required>
-      <input type="submit" value='{{T "save"}}'>
-    </form>
-  </main>
-
-</body>
-
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{T "editDevice"}}</title>
+		<link rel="stylesheet" href="/web/css/pico.min.css">
+	</head>
+	<body>
+		<header class="container">
+			<nav>
+				<ul>
+					<li><strong>Garden Equipment Log</strong></li>
+				</ul>
+				<ul>
+					<li><a href="/devices">{{T "devices"}}</a></li>
+					<li><a href="/bottles">{{T "bottles"}}</a></li>
+				</ul>
+			</nav>
+		</header>
+		<main class="container">
+			<h1>{{T "editDevice"}}</h1>
+			<form action="/device/save/{{.Id}}" method="POST">
+				<input type="text" name="name" value="{{.Name}}" placeholder='{{T "name"}}' required>
+				<input type="date" name="purchaseDate" value="{{.PurchaseDate}}" required>
+				<input type="number" step="0.01" name="purchasePrice" value="{{.PurchasePrice}}" placeholder='{{T "purchasePrice"}}' required>
+				<input type="submit" value='{{T "save"}}'>
+			</form>
+		</main>
+	</body>
 </html>

@@ -20,11 +20,16 @@ func errorHandling(w http.ResponseWriter, httpStatusCode int) {
 	w.WriteHeader(httpStatusCode)
 }
 
-type deviceOperationsPageData struct {
-	Device           models.Device
-	Dates            []string
-	Durations        []float64
-	OperationMinutes []float64
+type deviceOperationRow struct {
+	models.DeviceOperation
+	Minutes float64
+}
+
+type deviceHistoryPageData struct {
+	Device models.Device
+	Chart  models.ChartModel
+
+	OperationRows []deviceOperationRow
 }
 
 type bottleOperationMetric struct {
@@ -34,13 +39,13 @@ type bottleOperationMetric struct {
 }
 
 type bottleHistoryPageData struct {
-	Bottle          models.Bottle
-	Dates           []string
-	Weights         []float64
-	EmptyWeight     float64
+	Bottle models.Bottle
+	Chart  models.ChartModel
+
 	OperationRows   []bottleOperationMetric
 	TotalUsedGas    float64
 	TotalRestGas    float64
+	FillLevel       float64
 	TotalOperations int
 }
 
@@ -59,38 +64,8 @@ func getTemplateFuncs() template.FuncMap {
 	}
 }
 
-func parseDate(value string) (time.Time, error) {
-	return time.Parse("2006-01-02", value)
-}
-
 func parseDateTime(value string) (time.Time, error) {
 	return time.Parse("2006-01-02T15:04", value)
-}
-
-func calculateDeviceOperationMinutes(device models.Device) []float64 {
-	minutes := make([]float64, len(device.OperationHistory))
-	for i, operation := range device.OperationHistory {
-		if operation.StartTime == "" || operation.EndTime == "" {
-			minutes[i] = 0
-			continue
-		}
-		start, err := parseDateTime(operation.StartTime)
-		if err != nil {
-			minutes[i] = 0
-			continue
-		}
-		end, err := parseDateTime(operation.EndTime)
-		if err != nil {
-			minutes[i] = 0
-			continue
-		}
-		delta := end.Sub(start).Minutes()
-		if delta < 0 {
-			delta = 0
-		}
-		minutes[i] = delta
-	}
-	return minutes
 }
 
 func bottleMinMaxWeights(bottle models.Bottle) (float64, float64) {
@@ -182,16 +157,47 @@ func HandleDevicesView(w http.ResponseWriter, r *http.Request) {
 	handleDevicesView(w, r)
 }
 
+func buildDeviceHistoryRows(device models.Device) []deviceOperationRow {
+
+	rows := make([]deviceOperationRow, 0, len(device.OperationHistory))
+
+	for _, op := range device.OperationHistory {
+
+		var minutes float64
+
+		if op.StartTime != "" && op.EndTime != "" {
+
+			start, err1 := parseDateTime(op.StartTime)
+			end, err2 := parseDateTime(op.EndTime)
+
+			if err1 == nil && err2 == nil {
+				minutes = end.Sub(start).Minutes()
+
+				if minutes < 0 {
+					minutes = 0
+				}
+			}
+		}
+
+		rows = append(rows, deviceOperationRow{
+			DeviceOperation: op,
+			Minutes:         minutes,
+		})
+	}
+
+	return rows
+}
+
 func handleDevicesView(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
 		template.New("index.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/index.html"),
 	)
-	equipmentStorage, err := storage.GetEquipmentStorage()
+	devices, err := storage.GetDevices()
 	if err != nil {
 		errorHandling(w, 404)
 		log.Print(err)
 	}
-	err = tmpl.Execute(w, equipmentStorage)
+	err = tmpl.Execute(w, devices)
 	if err != nil {
 		errorHandling(w, 500)
 		log.Print(err)
@@ -202,121 +208,12 @@ func HandleBottlesView(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(
 		template.New("index.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/index.html"),
 	)
-	equipmentStorage, err := storage.GetEquipmentStorage()
+	bottles, err := storage.GetBottles()
 	if err != nil {
 		errorHandling(w, 404)
 		log.Print(err)
 	}
-	err = tmpl.Execute(w, equipmentStorage)
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-	}
-}
-
-func HandleDevicesChart(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(
-		template.New("chart.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/chart.html"),
-	)
-	chart, err := storage.GetDevicesForChart()
-	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
-	}
-	err = tmpl.Execute(w, chart)
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-	}
-}
-
-func HandleBottlesChart(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(
-		template.New("chart.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/chart.html"),
-	)
-	chart, err := storage.GetBottlesForChart()
-	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
-	}
-	err = tmpl.Execute(w, chart)
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-	}
-}
-
-func HandleDeviceOperationChart(w http.ResponseWriter, r *http.Request) {
-	deviceId := r.PathValue("deviceId")
-	id, err := utils.ConvertId(deviceId)
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-		return
-	}
-	chart, err := storage.GetDeviceOperationTimesForChart(id, 0)
-	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
-		return
-	}
-	tmpl := template.Must(
-		template.New("operationchart.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/operationchart.html"),
-	)
-	err = tmpl.Execute(w, chart)
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-	}
-}
-
-func HandleDeviceOperationsView(w http.ResponseWriter, r *http.Request) {
-	deviceId := r.PathValue("deviceId")
-	id, err := utils.ConvertId(deviceId)
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-		return
-	}
-	device, err := storage.GetDevice(id)
-	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
-		return
-	}
-	chart, err := storage.GetDeviceOperationTimesForChart(id, 0)
-	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
-		return
-	}
-	tmpl := template.Must(
-		template.New("operations.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/operations.html"),
-	)
-	err = tmpl.Execute(w, deviceOperationsPageData{Device: device, Dates: chart.Dates, Durations: chart.Durations})
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-	}
-}
-
-func HandleBottleWeightChart(w http.ResponseWriter, r *http.Request) {
-	bottleId, err := utils.ConvertId(r.PathValue("bottleId"))
-	if err != nil {
-		errorHandling(w, 500)
-		log.Print(err)
-		return
-	}
-	chart, err := storage.GetBottleWeightHistoryForChart(bottleId)
-	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
-		return
-	}
-	tmpl := template.Must(
-		template.New("weightchart.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/weightchart.html"),
-	)
-	err = tmpl.Execute(w, chart)
+	err = tmpl.Execute(w, bottles)
 	if err != nil {
 		errorHandling(w, 500)
 		log.Print(err)
@@ -324,7 +221,7 @@ func HandleBottleWeightChart(w http.ResponseWriter, r *http.Request) {
 }
 
 // New wrappers and compatibility handlers expected by cmd/main.go
-func HandleAddDeviceGetOperation(w http.ResponseWriter, r *http.Request) {
+func HandleAddDeviceOperationGet(w http.ResponseWriter, r *http.Request) {
 	deviceId, err := utils.ConvertId(r.PathValue("deviceId"))
 	if err != nil {
 		errorHandling(w, 500)
@@ -341,10 +238,6 @@ func HandleAddDeviceGetOperation(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleAddDevicePostOperation(w http.ResponseWriter, r *http.Request) {
-	HandleAddDeviceOperationPost(w, r)
-}
-
 func HandleEditDeviceOperation(w http.ResponseWriter, r *http.Request) {
 	HandleEditDeviceOperationGet(w, r)
 }
@@ -354,37 +247,48 @@ func HandleSaveDeviceOperation(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleDeviceHistory(w http.ResponseWriter, r *http.Request) {
-	id, err := utils.ConvertId(r.PathValue("id"))
+
+	deviceId := r.PathValue("id")
+
+	id, err := utils.ConvertId(deviceId)
 	if err != nil {
 		errorHandling(w, 500)
-		log.Print(err)
 		return
 	}
+
 	device, err := storage.GetDevice(id)
 	if err != nil {
 		errorHandling(w, 404)
-		log.Print(err)
 		return
 	}
-	chart, err := storage.GetDeviceOperationMinutesPerYearForChart(id)
+
+	chart, err := storage.GetDeviceChart(id)
 	if err != nil {
-		errorHandling(w, 404)
-		log.Print(err)
+		errorHandling(w, 500)
 		return
 	}
-	tmpl := template.Must(
-		template.New("history.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/device/history.html"),
-	)
-	view := deviceOperationsPageData{
-		Device:           device,
-		Dates:            chart.Dates,
-		Durations:        chart.Durations,
-		OperationMinutes: calculateDeviceOperationMinutes(device),
+
+	rows := buildDeviceHistoryRows(device)
+
+	view := deviceHistoryPageData{
+		Device:        device,
+		Chart:         chart,
+		OperationRows: rows,
 	}
+
+	tmpl := template.Must(
+		template.New("history.html").
+			Funcs(getTemplateFuncs()).
+			ParseFS(
+				configs.GetWebFiles(),
+				"templates/device/history.html",
+			),
+	)
+
 	err = tmpl.Execute(w, view)
 	if err != nil {
 		errorHandling(w, 500)
-		log.Print(err)
+		return
 	}
 }
 
@@ -397,35 +301,54 @@ func HandleSaveBottleOperation(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleBottleHistory(w http.ResponseWriter, r *http.Request) {
-	bottleId, err := utils.ConvertId(r.PathValue("id"))
+	bottleId := r.PathValue("id")
+
+	id, err := utils.ConvertId(bottleId)
 	if err != nil {
 		errorHandling(w, 500)
-		log.Print(err)
 		return
 	}
-	chart, err := storage.GetBottleWeightHistoryForChart(bottleId)
+
+	bottle, err := storage.GetBottle(id)
 	if err != nil {
 		errorHandling(w, 404)
-		log.Print(err)
 		return
 	}
-	rows, totalUsed, totalRest, emptyWeight := buildBottleHistoryData(chart.Bottle)
-	tmpl := template.Must(
-		template.New("history.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/bottle/history.html"),
-	)
+
+	chart, err := storage.GetBottleChart(id)
+	if err != nil {
+		errorHandling(w, 500)
+		return
+	}
+
+	rows, totalUsed, totalRest, _ := buildBottleHistoryData(bottle) // totalRest is not used in the view, but could be added if desired
+
+	fillLevel := (totalRest / bottle.FillingWeight) * 100
+
 	view := bottleHistoryPageData{
-		Bottle:          chart.Bottle,
-		Dates:           chart.Dates,
-		Weights:         chart.Weights,
-		EmptyWeight:     emptyWeight,
+		Bottle:          bottle,
+		Chart:           chart,
 		OperationRows:   rows,
 		TotalUsedGas:    totalUsed,
 		TotalRestGas:    totalRest,
+		FillLevel:       fillLevel,
 		TotalOperations: len(rows),
 	}
+
+	fmt.Println(rows)
+
+	tmpl := template.Must(
+		template.New("history.html").
+			Funcs(getTemplateFuncs()).
+			ParseFS(
+				configs.GetWebFiles(),
+				"templates/bottle/history.html",
+			),
+	)
+
 	err = tmpl.Execute(w, view)
 	if err != nil {
 		errorHandling(w, 500)
-		log.Print(err)
+		return
 	}
 }

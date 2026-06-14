@@ -48,15 +48,16 @@ func GetEquipmentStorage() (models.EquipmentStorage, error) {
 		return models.EquipmentStorage{}, err
 	}
 	storage = sortStorage(storage)
-	for i := range storage.Bottles {
-		storage.Bottles[i].CurrentFillLevel = calculateBottleFillLevel(storage.Bottles[i])
-	}
-	for i := range storage.Devices {
-		storage.Devices[i].LastUsageDate = latestDeviceOperationTimestamp(storage.Devices[i])
-		storage.Devices[i].TotalOperations = calculateDeviceTotalOperations(storage.Devices[i])
-		storage.Devices[i].TotalOperationHours = calculateDeviceTotalOperationHours(storage.Devices[i])
-		storage.Devices[i].PricePerHour = calculateDevicePricePerHour(storage.Devices[i])
-	}
+	// for i := range storage.Bottles {
+	// 	storage.Bottles[i].RemainingGas = storage.Bottles[i].InitialWeight - getLatestBottleWeight(storage.Bottles[i])
+	// 	storage.Bottles[i].CurrentFillLevel = calculateBottleFillLevel(storage.Bottles[i])
+	// }
+	// for i := range storage.Devices {
+	// 	storage.Devices[i].LastUsageDate = latestDeviceOperationTimestamp(storage.Devices[i])
+	// 	storage.Devices[i].TotalOperations = calculateDeviceTotalOperations(storage.Devices[i])
+	// 	storage.Devices[i].TotalOperationHours = calculateDeviceTotalOperationHours(storage.Devices[i])
+	// 	storage.Devices[i].PricePerHour = calculateDevicePricePerHour(storage.Devices[i])
+	// }
 	return storage, nil
 }
 

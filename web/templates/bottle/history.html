@@ -1,168 +1,99 @@
 <!DOCTYPE html>
 <html lang='{{T "language"}}'>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{T "bottle"}} {{T "weight"}}</title>
-  <link rel="stylesheet" href="/web/css/pico.min.css">
-  <link rel="stylesheet" href="/web/css/center.css">
-  <link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
-  <link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
-  <script src="/web/js/chart.min.js"></script>
-  <script src="/web/js/format.js" defer></script>
-</head>
-<body>
-<header class="container">
-  <nav>
-    <ul>
-      <li><strong>Garden Equipment Log</strong></li>
-    </ul>
-    <ul>
-      <li><a href="/devices">{{T "devices"}}</a></li>
-      <li><a href="/bottles">{{T "bottles"}}</a></li>
-    </ul>
-  </nav>
-</header>
-
-<main class="container-fluid">
-  <div class="center">
-    <h1>{{T "operations"}}</h1>
-  </div>
-  <div class="center">
-    <h2>{{T "bottle"}}</h2>
-  </div>
-  <div class="center">
-    <h3 class="bottle-purchase-date">{{.Bottle.PurchaseDate}}</h3>
-  </div>
-
-  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin:1rem 0;">
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "totalUsedGas"}}</strong>
-      <div>{{formatFloat .TotalUsedGas 1}} kg</div>
-    </div>
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "restGas"}}</strong>
-      <div>{{formatFloat .TotalRestGas 1}} kg</div>
-    </div>
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "totalOperations"}}</strong>
-      <div>{{.TotalOperations}}</div>
-    </div>
-    <div style="padding:1rem; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#111827; color:#f8fafc; box-shadow:0 2px 8px rgba(15,23,42,0.2);">
-      <strong>{{T "fillLevel"}}</strong>
-      <div>{{formatFloat .Bottle.CurrentFillLevel 0}} %</div>
-    </div>
-  </div>
-
-  <canvas id="weightHistoryChart" style="margin: 20px 0; max-height: 500px;"></canvas>
-
-  <div class="table-cards">
-    <table>
-      <thead>
-        <tr>
-          <th>{{T "date"}}</th>
-          <th>{{T "weight"}}</th>
-          <th>{{T "restGas"}}</th>
-          <th>{{T "usedGas"}}</th>
-          <th>{{T "action"}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{range .OperationRows}}
-        <tr>
-          <td><div class="date">{{.Date}}</div></td>
-          <td>{{formatFloat .Weight 1}}</span> kg</td>
-          <td>{{formatFloat .RestGas 1}} kg</td>
-          <td>{{formatFloat .UsedGas 1}} kg</td>
-          <td>
-            <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
-              <form action="/bottle-operation/edit/{{.Id}}" style="margin:0;">
-                <button type="submit" class="secondary" style="width: 100%;"><i class="fa-solid fa-pen"></i></button>
-              </form>
-              <form action="/bottle-operation/delete/{{.Id}}" style="margin:0;">
-                <button type="submit" class="contrast" style="width: 100%;"><i class="fa-solid fa-trash"></i></button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
-  </div>
-
-</main>
-
-<script>
-  function formatDate(date) {
-    date = new Date(date);
-    const options = {year: "numeric", month: "2-digit", day: "2-digit"};
-    return date.toLocaleDateString("de-DE", options);
-  }
-
-  const ctx = document.getElementById('weightHistoryChart');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [{{range $i, $date := .Dates}}{{if $i}}, {{end}}"{{$date}}"{{end}}],
-      datasets: [{
-        label: '{{T "emptyWeight"}}',
-        data: [{{range $i, $date := .Dates}}{{if $i}}, {{end}}{{$.EmptyWeight}}{{end}}],
-        borderWidth: 2,
-        borderColor: 'rgb(255, 99, 132)',
-        borderDash: [6, 4],
-        backgroundColor: 'transparent',
-        pointRadius: 0,
-        fill: false
-      }, {
-        label: '{{T "weight"}} (kg)',
-        data: [{{range $i, $weight := .Weights}}{{if $i}}, {{end}}{{$weight}}{{end}}],
-        borderWidth: 2,
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        borderColor: 'rgb(153, 102, 255)',
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: true, position: 'top' },
-        tooltip: {
-          callbacks: {
-            title: (tooltipItem) => formatDate(tooltipItem[0].label),
-            label: (tooltipItem) => {
-              const value = Number(tooltipItem.raw);
-              const formatted = Number.isInteger(value)
-                ? value.toLocaleString('de-DE')
-                : value.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
-              return formatted + ' kg';
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              const num = Number(value);
-              const formatted = Number.isInteger(num)
-                ? num.toLocaleString('de-DE')
-                : num.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
-              return formatted + ' kg';
-            }
-          }
-        },
-        x: {
-          ticks: {
-            callback: function(value) {
-              return formatDate(this.getLabelForValue(value));
-            }
-          }
-        }
-      }
-    }
-  });
-</script>
-</body>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{T "bottle"}} {{T "weight"}}</title>
+		<link rel="stylesheet" href="/web/css/pico.min.css">
+		<link rel="stylesheet" href="/web/css/style.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
+		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
+		<script src="/web/js/chart.min.js"></script>
+		<script src="/web/js/format.js" defer></script>
+		<script src="/web/js/chartSettings.js"></script>
+	</head>
+	<body>
+		<header class="container">
+			<nav>
+				<ul>
+					<li><strong>Garden Equipment Log</strong></li>
+				</ul>
+				<ul>
+					<li><a href="/devices">{{T "devices"}}</a></li>
+					<li><a href="/bottles">{{T "bottles"}}</a></li>
+				</ul>
+			</nav>
+		</header>
+		<main class="container-fluid">
+			<div class="center">
+				<h1>{{T "operations"}}</h1>
+			</div>
+			<div class="center">
+				<h2>{{T "bottle"}}</h2>
+			</div>
+			<div class="center">
+				<h3 class="bottle-purchase-date">{{.Bottle.PurchaseDate}}</h3>
+			</div>
+			<div class="grid">
+				<article class="card">
+					<strong class="center">{{T "totalUsedGas"}}</strong>
+					<div class="center">{{formatFloat .TotalUsedGas 1}} kg</div>
+				</article>
+				<article class="card">
+					<strong class="center">{{T "restGas"}}</strong>
+					<div class="center">{{formatFloat .TotalRestGas 1}} kg</div>
+				</article>
+				<article class="card">
+					<strong class="center">{{T "totalOperations"}}</strong>
+					<div class="center">{{.TotalOperations}}</div>
+				</article>
+				<article class="card">
+					<strong class="center">{{T "fillLevel"}}</strong>
+					<div class="center">{{formatFloat .FillLevel 0}} %</div>
+				</article>
+			</div>
+			<canvas id="weightChart"></canvas>
+			<div>
+				<table>
+					<thead>
+						<tr>
+							<th>{{T "date"}}</th>
+							<th>{{T "weight"}}</th>
+							<th>{{T "restGas"}}</th>
+							<th>{{T "usedGas"}}</th>
+							<th>{{T "action"}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{range .OperationRows}}
+						<tr>
+							<td>
+								<div class="date">{{.Date}}</div>
+							</td>
+							<td>{{formatFloat .Weight 1}}</span> kg</td>
+							<td>{{formatFloat .RestGas 1}} kg</td>
+							<td>{{formatFloat .UsedGas 1}} kg</td>
+							<td>
+								<article>
+									<form action="/bottle-operation/edit/{{.Id}}">
+										<button type="submit" class="secondary"><i class="fa-solid fa-pen"></i></button>
+									</form>
+									<form action="/bottle-operation/delete/{{.Id}}">
+										<button type="submit" class="contrast"><i class="fa-solid fa-trash"></i></button>
+									</form>
+								</article>
+							</td>
+						</tr>
+						{{end}}
+					</tbody>
+				</table>
+			</div>
+		</main>
+		<script>
+			renderChart(
+			  "weightChart",
+			  {{ .Chart }}
+			);
+		</script>
+	</body>
 </html>

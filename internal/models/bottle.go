@@ -11,7 +11,9 @@ type Bottle struct {
 	Id int64 `json:"Id"`
 	BottleInput
 	OperationHistory []BottleOperation `json:"OperationHistory"`
-	CurrentFillLevel float64           `json:"-"`
+	TotalOperations  int               `json:"-"`
+	RestGas          float64           `json:"-"`
+	UsedGas          float64           `json:"-"`
 }
 
 type BottleOperationInput struct {

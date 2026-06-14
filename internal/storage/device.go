@@ -3,6 +3,7 @@ package storage
 import (
 	"slices"
 	"sort"
+	"time"
 
 	"github.com/lukas-arnold/garden-equipment-log/internal/models"
 	"github.com/lukas-arnold/garden-equipment-log/internal/utils"
@@ -26,6 +27,9 @@ func GetDevices() ([]models.Device, error) {
 	storage, err := GetEquipmentStorage()
 	if err != nil {
 		return nil, err
+	}
+	for i := range storage.Devices {
+		enrichDevice(&storage.Devices[i])
 	}
 	return storage.Devices, nil
 }
@@ -81,6 +85,40 @@ func DeleteDevice(id int64) error {
 		return err
 	}
 	return nil
+}
+
+func enrichDevice(device *models.Device) {
+	device.TotalOperations = len(device.OperationHistory)
+	var totalHours float64
+	var lastUsage time.Time
+	for _, op := range device.OperationHistory {
+		if op.StartTime == "" || op.EndTime == "" {
+			continue
+		}
+		start, err := time.Parse("2006-01-02T15:04", op.StartTime)
+		if err != nil {
+			continue
+		}
+		end, err := time.Parse("2006-01-02T15:04", op.EndTime)
+		if err != nil {
+			continue
+		}
+		hours := end.Sub(start).Hours()
+		if hours < 0 {
+			hours = 0
+		}
+		totalHours += hours
+		if start.After(lastUsage) {
+			lastUsage = start
+		}
+	}
+	device.TotalOperationHours = totalHours
+	if totalHours > 0 {
+		device.PricePerHour = device.PurchasePrice / totalHours
+	}
+	if !lastUsage.IsZero() {
+		device.LastUsageDate = lastUsage.Format("2006-01-02")
+	}
 }
 
 func sortDevices(devices []models.Device) []models.Device {
