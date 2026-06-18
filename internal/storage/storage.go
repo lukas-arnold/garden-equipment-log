@@ -2,6 +2,7 @@ package storage
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/lukas-arnold/garden-equipment-log/internal/configs"
 	"github.com/lukas-arnold/garden-equipment-log/internal/models"
@@ -33,6 +34,7 @@ func readStorage() ([]byte, error) {
 func checkStorage() {
 	_, err := os.ReadFile(configs.GetStorageFile())
 	if err != nil {
+		os.MkdirAll(filepath.Dir(configs.GetStorageFile()), 0755)
 		saveStorage(models.EquipmentStorage{})
 	}
 }
