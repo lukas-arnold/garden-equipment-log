@@ -1,5 +1,5 @@
 {{define "template"}}
-<h1>{{T "editDevice"}}</h1>
+<h1 class="center">{{T "editDevice"}}</h1>
 <form action="/device/save/{{.Id}}" method="POST">
 	<input type="text" name="name" value="{{.Name}}" placeholder='{{T "name"}}' required>
 	<input type="date" name="purchaseDate" value="{{.PurchaseDate}}" required>

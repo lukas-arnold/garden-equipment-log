@@ -10,8 +10,8 @@
 		<link rel="stylesheet" href="/web/css/style.css">
 		<link rel="stylesheet" href="/web/assets/fontawesome/css/fontawesome.min.css">
 		<link rel="stylesheet" href="/web/assets/fontawesome/css/solid.min.css">
-		<script src="/web/js/format.js" defer></script>
-		<script src="/web/js/today.js" defer></script>
+		<script src="/web/js/format.js"></script>
+		<script src="/web/js/eventListener.js" defer></script>
 	</head>
 	<script>
 		if ("serviceWorker" in navigator) {
@@ -20,10 +20,10 @@
 		}
 	</script>
 	<body>
-		<header class="container-fluid">
+		<header class="container">
 			<nav>
 				<ul>
-					<li><strong>Garden Equipment Log</strong></li>
+					<li><strong>{{T "title"}}</strong></li>
 				</ul>
 				<ul>
 					<li><a href="/devices">{{T "devices"}}</a></li>

@@ -1,5 +1,5 @@
 {{define "template"}}
-<h1>{{.Title}}</h1>
+<h1 class="center">{{.Title}}</h1>
 <form action="{{.Action}}" method="POST">
 	<input type="text" name="name" placeholder='{{T "name"}}' value="{{.Device.Name}}" required>
 	<input type="date" name="purchaseDate" value="{{.Device.PurchaseDate}}" required>

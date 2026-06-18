@@ -1,5 +1,4 @@
 Chart.defaults.elements.line.tension = 0.4;
-
 Chart.defaults.interaction = {
     mode: "index",
     intersect: false
@@ -10,30 +9,16 @@ function isIsoDate(value) {
         /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-function formatDate(value) {
-    return new Date(value).toLocaleDateString("de-DE", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-    });
-}
-
 function formatValue(value, unit) {
-
-    if (value == null) {
-        return "";
-    }
+    if (value == null) return "";
 
     const num = Number(value);
-
-    if (Number.isNaN(num)) {
-        return value;
-    }
+    if (Number.isNaN(num)) return value;
 
     switch (unit) {
-
         case "kg":
         case "cm":
+        case "h":
             return (
                 num.toLocaleString("de-DE", {
                     minimumFractionDigits: 1,
@@ -41,15 +26,6 @@ function formatValue(value, unit) {
                 }) +
                 " " +
                 unit
-            );
-
-        case "h":
-            return (
-                num.toLocaleString("de-DE", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1
-                }) +
-                " h"
             );
 
         case "min":
@@ -68,7 +44,6 @@ function formatValue(value, unit) {
 }
 
 function renderChart(canvasId, model) {
-
     const ctx = document.getElementById(canvasId);
 
     const datasets = model.sets.map(set => ({

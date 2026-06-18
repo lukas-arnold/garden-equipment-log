@@ -1,5 +1,5 @@
 {{define "template"}}
-<h1>{{T "editBottle"}}</h1>
+<h1 class="center">{{T "editBottle"}}</h1>
 <form action="/bottle/save/{{.Id}}" method="POST">
 	<input type="date" name="purchaseDate" value="{{.PurchaseDate}}" required>
 	<input type="number" step="0.01" name="purchasePrice" value="{{.PurchasePrice}}" placeholder='{{T "purchasePrice"}}' required>
