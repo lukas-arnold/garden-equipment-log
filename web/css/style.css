@@ -11,4 +11,5 @@ th, td {
 
 canvas {
   max-height: 720px;
+  margin-bottom: 2em;
 }

@@ -21,7 +21,7 @@ type deviceFormData struct {
 
 type deviceOperationRow struct {
 	models.DeviceOperation
-	Minutes float64
+	Time float64
 }
 
 type deviceHistoryPageData struct {
@@ -205,7 +205,7 @@ func buildDeviceHistoryRows(device models.Device) []deviceOperationRow {
 		}
 		rows = append(rows, deviceOperationRow{
 			DeviceOperation: op,
-			Minutes:         minutes,
+			Time:            minutes,
 		})
 	}
 	return rows

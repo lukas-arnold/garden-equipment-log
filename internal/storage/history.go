@@ -15,7 +15,7 @@ func GetDeviceChart(deviceId int64) (models.ChartModel, error) {
 	if err != nil {
 		return models.ChartModel{}, err
 	}
-	yearHours := make(map[int]float64)
+	yearMinutes := make(map[int]float64)
 	for _, op := range device.OperationHistory {
 		if op.StartTime == "" || op.EndTime == "" {
 			continue
@@ -28,14 +28,14 @@ func GetDeviceChart(deviceId int64) (models.ChartModel, error) {
 		if err != nil {
 			continue
 		}
-		hours := end.Sub(start).Hours()
-		if hours < 0 {
-			hours = 0
+		minutes := end.Sub(start).Minutes()
+		if minutes < 0 {
+			minutes = 0
 		}
-		yearHours[start.Year()] += hours
+		yearMinutes[start.Year()] += minutes
 	}
 	var years []int
-	for year := range yearHours {
+	for year := range yearMinutes {
 		years = append(years, year)
 	}
 	sort.Ints(years)
@@ -43,15 +43,15 @@ func GetDeviceChart(deviceId int64) (models.ChartModel, error) {
 	var values []float64
 	for _, year := range years {
 		labels = append(labels, fmt.Sprintf("%d", year))
-		values = append(values, yearHours[year])
+		values = append(values, yearMinutes[year])
 	}
 	return models.ChartModel{
 		Type:   "bar",
 		Labels: labels,
 		Sets: []models.ChartDataset{
 			{
-				Label: language.T(configs.GetLanguage(), "operationHours"),
-				Unit:  "h",
+				Label: language.T(configs.GetLanguage(), "operationTime"),
+				Unit:  "h/min",
 				Data:  values,
 			},
 		},

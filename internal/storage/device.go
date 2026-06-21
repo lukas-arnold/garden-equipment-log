@@ -104,7 +104,7 @@ func DeleteDevice(id int64) error {
 
 func enrichDevice(device *models.Device) {
 	device.TotalOperations = len(device.OperationHistory)
-	var totalHours float64
+	var totalMinutes float64
 	var lastUsage time.Time
 	for _, op := range device.OperationHistory {
 		start, err1 := utils.ParseDateTime(op.StartTime)
@@ -112,14 +112,14 @@ func enrichDevice(device *models.Device) {
 		if err1 != nil || err2 != nil {
 			continue
 		}
-		totalHours += max(0, end.Sub(start).Hours())
+		totalMinutes += max(0, end.Sub(start).Minutes())
 		if start.After(lastUsage) {
 			lastUsage = start
 		}
 	}
-	device.TotalOperationHours = totalHours
-	if totalHours > 0 {
-		device.PricePerHour = device.PurchasePrice / totalHours
+	device.TotalOperationTime = totalMinutes
+	if totalMinutes > 0 {
+		device.PricePerHour = device.PurchasePrice / (totalMinutes / 60)
 	}
 	if !lastUsage.IsZero() {
 		device.LastUsageDate = lastUsage.Format(time.DateOnly)

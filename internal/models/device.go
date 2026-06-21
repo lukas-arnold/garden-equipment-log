@@ -9,11 +9,11 @@ type DeviceInput struct {
 type Device struct {
 	Id int64 `json:"Id"`
 	DeviceInput
-	OperationHistory    []DeviceOperation `json:"OperationHistory"`
-	LastUsageDate       string            `json:"-"`
-	TotalOperations     int               `json:"-"`
-	TotalOperationHours float64           `json:"-"`
-	PricePerHour        float64           `json:"-"`
+	OperationHistory   []DeviceOperation `json:"OperationHistory"`
+	LastUsageDate      string            `json:"-"`
+	TotalOperations    int               `json:"-"`
+	TotalOperationTime float64           `json:"-"`
+	PricePerHour       float64           `json:"-"`
 }
 
 type DeviceOperationInput struct {

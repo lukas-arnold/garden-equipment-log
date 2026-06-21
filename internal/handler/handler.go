@@ -28,6 +28,20 @@ func getTemplateFuncs() template.FuncMap {
 		"formatEuro": func(value float64) string {
 			return strings.ReplaceAll(fmt.Sprintf("%.2f €", value), ".", ",")
 		},
+		"formatOperationTime": func(value float64) string {
+			totalMinutes := int64(value)
+			hours := totalMinutes / 60
+			minutes := totalMinutes % 60
+
+			if hours > 0 {
+				if minutes == 0 {
+					return fmt.Sprintf("%d h", hours)
+				}
+				return fmt.Sprintf("%d h %d min", hours, minutes)
+			}
+
+			return fmt.Sprintf("%d min", minutes)
+		},
 	}
 }
 

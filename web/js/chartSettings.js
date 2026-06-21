@@ -4,11 +4,6 @@ Chart.defaults.interaction = {
     intersect: false
 };
 
-function isIsoDate(value) {
-    return typeof value === "string" &&
-        /^\d{4}-\d{2}-\d{2}$/.test(value);
-}
-
 function formatValue(value, unit) {
     if (value == null) return "";
 
@@ -18,7 +13,6 @@ function formatValue(value, unit) {
     switch (unit) {
         case "kg":
         case "cm":
-        case "h":
             return (
                 num.toLocaleString("de-DE", {
                     minimumFractionDigits: 1,
@@ -28,7 +22,6 @@ function formatValue(value, unit) {
                 unit
             );
 
-        case "min":
         case "%":
             return (
                 num.toLocaleString("de-DE", {
@@ -37,6 +30,20 @@ function formatValue(value, unit) {
                 " " +
                 unit
             );
+        case "h/min":
+            const totalMinutes = Math.floor(num);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+
+            if (hours > 0) {
+                if (minutes === 0) {
+                    return `${hours} h`;
+                }
+
+                return `${hours} h ${minutes} min`;
+            }
+
+            return `${minutes} min`;
 
         default:
             return num.toLocaleString("de-DE");
@@ -55,6 +62,10 @@ function renderChart(canvasId, model) {
         ? model.sets[0].unit
         : "";
 
+    const formatXAxis = model.type === "bar"
+        ? formatYear
+        : formatDate;
+
     new Chart(ctx, {
         type: model.type || "line",
 
@@ -69,14 +80,10 @@ function renderChart(canvasId, model) {
             scales: {
                 x: {
                     ticks: {
-                        callback(value) {
-
-                            const label =
-                                this.getLabelForValue(value);
-
-                            return isIsoDate(label)
-                                ? formatDate(label)
-                                : label;
+                        callback: function(value) {
+                            return formatXAxis(
+                                this.getLabelForValue(value)
+                            );
                         }
                     }
                 },
@@ -84,32 +91,26 @@ function renderChart(canvasId, model) {
                 y: {
                     beginAtZero: true,
 
-                    ticks: {
-                        callback(value) {
-                            return formatValue(
-                                value,
-                                unit
-                            );
-                        }
+                ticks: {
+                    stepSize: model.type === "bar" && unit === "h/min"
+                        ? 60
+                        : undefined,
+
+                    callback(value) {
+                        return formatValue(value, unit);
                     }
+                }
                 }
             },
 
             plugins: {
                 tooltip: {
                     callbacks: {
-
-                        title(items) {
-
-                            const label = items[0].label;
-
-                            return isIsoDate(label)
-                                ? formatDate(label)
-                                : label;
+                        title: (items) => {
+                            return formatXAxis(items[0].label);
                         },
 
                         label(ctx) {
-
                             const unit =
                                 model.sets[ctx.datasetIndex]?.unit || "";
 

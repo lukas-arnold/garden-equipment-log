@@ -14,6 +14,11 @@ const formatDateTime = date =>
         minute: "2-digit"
     });
 
+const formatYear = date =>
+    new Date(date).toLocaleDateString("default", {
+        year: "numeric",
+    });
+
 const formatBottlePurchaseDate = date =>
     new Date(date).toLocaleDateString("default", {
         year: "numeric",

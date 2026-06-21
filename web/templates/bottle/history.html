@@ -10,16 +10,16 @@
 </div>
 <div class="grid">
 	<article class="card">
+		<strong class="center">{{T "operationCount"}}</strong>
+		<div class="center">{{.Bottle.TotalOperations}}</div>
+	</article>
+	<article class="card">
 		<strong class="center">{{T "usedGas"}}</strong>
 		<div class="center">{{formatFloat .Bottle.UsedGas 1}} kg</div>
 	</article>
 	<article class="card">
 		<strong class="center">{{T "restGas"}}</strong>
 		<div class="center">{{formatFloat .Bottle.RestGas 1}} kg</div>
-	</article>
-	<article class="card">
-		<strong class="center">{{T "totalOperations"}}</strong>
-		<div class="center">{{.Bottle.TotalOperations}}</div>
 	</article>
 	<article class="card">
 		<strong class="center">{{T "fillLevel"}}</strong>

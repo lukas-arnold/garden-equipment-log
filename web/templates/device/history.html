@@ -11,12 +11,12 @@
 		<div class="center">{{.Device.TotalOperations}}</div>
 	</article>
 	<article class="card">
-		<strong class="center">{{T "operationHours"}}</strong>
-		<div class="center">{{formatFloat .Device.TotalOperationHours 1}} {{T "hours"}}</div>
+		<strong class="center">{{T "operationTime"}}</strong>
+		<div class="center">{{formatOperationTime .Device.TotalOperationTime}}</div>
 	</article>
 	<article class="card">
 		<strong class="center">{{T "pricePerHour"}}</strong>
-		<div class="center">{{formatEuro .Device.PricePerHour}}</div>
+		<div class="center">{{formatEuro .Device.PricePerHour}}/h</div>
 	</article>
 </div>
 <canvas id="chart"></canvas>
@@ -25,8 +25,8 @@
 		<thead>
 			<tr>
 				<th>{{T "date"}}</th>
+				<th>{{T "operationTime"}}</th>
 				<th>{{T "note"}}</th>
-				<th>{{T "operationMinutes"}}</th>
 				<th>{{T "action"}}</th>
 			</tr>
 		</thead>
@@ -38,10 +38,10 @@
 					<span class="datetime">{{.EndTime}}</span>
 				</td>
 				<td>
-					{{.Note}}
+					{{formatOperationTime .Time}}
 				</td>
 				<td>
-					{{formatFloat .Minutes 0}} min
+					{{.Note}}
 				</td>
 				<td>
 					<article>
