@@ -9,7 +9,7 @@ import (
 
 const (
 	defaultPort        = ":8080"
-	defaultStorageFile = "data/strength-tracker.json"
+	defaultStorageFile = "data/garden-equipment-log.json"
 	defaultLanguage    = "en"
 )
 
