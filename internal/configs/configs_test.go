@@ -25,8 +25,8 @@ func TestGetPort(t *testing.T) {
 func TestGetStorageFile(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
 		os.Unsetenv("STORAGE_FILE")
-		if got := GetStorageFile(); got != "data/strength-tracker.json" {
-			t.Errorf("expected data/strength-tracker.json, got %s", got)
+		if got := GetStorageFile(); got != "data/garden-equipment-log.json" {
+			t.Errorf("expected data/garden-equipment-log.json, got %s", got)
 		}
 	})
 

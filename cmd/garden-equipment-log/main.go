@@ -19,6 +19,6 @@ func main() {
 	h := handler.New(store)
 	server := createServer(h)
 
-	log.Printf("Strength Tracker running on %s", configs.GetPort())
+	log.Printf("Garden Equipment Log running on %s", configs.GetPort())
 	log.Fatal(http.ListenAndServe(configs.GetPort(), server))
 }
