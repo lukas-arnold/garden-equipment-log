@@ -1,27 +1,27 @@
 package models
 
 type BottleInput struct {
-	PurchaseDate  string  `json:"PurchaseDate"`
-	PurchasePrice float64 `json:"PurchasePrice"`
-	InitialWeight float64 `json:"InitialWeight"`
-	FillingWeight float64 `json:"FillingWeight"`
+	PurchaseDate  string  `json:"purchaseDate"`
+	PurchasePrice float64 `json:"purchasePrice"`
+	InitialWeight float64 `json:"initialWeight"`
+	FillingWeight float64 `json:"fillingWeight"`
 }
 
 type Bottle struct {
-	Id int64 `json:"Id"`
+	Id int64 `json:"id"`
 	BottleInput
-	OperationHistory []BottleOperation `json:"OperationHistory"`
-	TotalOperations  int               `json:"-"`
-	RestGas          float64           `json:"-"`
-	UsedGas          float64           `json:"-"`
+	OperationHistory []BottleOperation `json:"operationHistory"`
+	TotalOperations  int
+	RestGas          float64
+	UsedGas          float64
 }
 
 type BottleOperationInput struct {
-	Date   string  `json:"Date"`
-	Weight float64 `json:"Weight"`
+	Date   string  `json:"date"`
+	Weight float64 `json:"weight"`
 }
 
 type BottleOperation struct {
-	Id int64 `json:"Id"`
+	Id int64 `json:"id"`
 	BottleOperationInput
 }

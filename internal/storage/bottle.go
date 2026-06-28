@@ -21,7 +21,6 @@ func (s *Storage) AddBottle(input models.BottleInput) error {
 	}
 
 	storage.Bottles = append(storage.Bottles, bottle)
-
 	return s.saveStorage(storage)
 }
 
@@ -34,13 +33,11 @@ func (s *Storage) GetBottles() ([]models.Bottle, error) {
 	for i := range storage.Bottles {
 		enrichBottle(&storage.Bottles[i])
 	}
-
 	return storage.Bottles, nil
 }
 
 func (s *Storage) GetBottle(id int64) (models.Bottle, error) {
 	bottles, err := s.GetBottles()
-
 	if err != nil {
 		return models.Bottle{}, err
 	}
@@ -50,13 +47,11 @@ func (s *Storage) GetBottle(id int64) (models.Bottle, error) {
 			return bottle, nil
 		}
 	}
-
 	return models.Bottle{}, nil
 }
 
 func (s *Storage) GetBottleIdByOperationId(id int64) (int64, error) {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return 0, err
 	}
@@ -68,13 +63,11 @@ func (s *Storage) GetBottleIdByOperationId(id int64) (int64, error) {
 			}
 		}
 	}
-
 	return 0, nil
 }
 
 func (s *Storage) UpdateBottle(bottle models.Bottle) error {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return err
 	}
@@ -85,35 +78,26 @@ func (s *Storage) UpdateBottle(bottle models.Bottle) error {
 			break
 		}
 	}
-
 	return s.saveStorage(storage)
 }
 
 func (s *Storage) DeleteBottle(id int64) error {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return err
 	}
 
-	for i := range storage.Bottles {
-		if storage.Bottles[i].Id == id {
-			storage.Bottles = slices.Delete(
-				storage.Bottles,
-				i,
-				i+1,
-			)
-
+	for i, b := range storage.Bottles {
+		if b.Id == id {
+			storage.Bottles = slices.Delete(storage.Bottles, i, i+1)
 			return s.saveStorage(storage)
 		}
 	}
-
 	return nil
 }
 
 func enrichBottle(bottle *models.Bottle) {
 	bottle.TotalOperations = len(bottle.OperationHistory)
-
 	usedGas := 0.0
 
 	if len(bottle.OperationHistory) > 0 {
@@ -130,9 +114,7 @@ func sortBottles(bottles []models.Bottle) []models.Bottle {
 		if bottles[i].PurchaseDate != bottles[j].PurchaseDate {
 			return bottles[i].PurchaseDate > bottles[j].PurchaseDate
 		}
-
 		return bottles[i].Id < bottles[j].Id
 	})
-
 	return bottles
 }

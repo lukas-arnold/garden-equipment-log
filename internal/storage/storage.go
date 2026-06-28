@@ -13,25 +13,26 @@ type Storage struct {
 }
 
 func New(file string) *Storage {
-	return &Storage{
-		file: file,
-	}
+	return &Storage{file: file}
 }
 
 func (s *Storage) saveStorage(storage models.EquipmentStorage) error {
 	storage = sortStorage(storage)
 
-	bytes, err := utils.ConvertEquipmentStorageToBytes(storage)
+	data, err := utils.ConvertEquipmentStorageToBytes(storage)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(s.file, bytes, 0666)
+	if err := os.MkdirAll(filepath.Dir(s.file), 0755); err != nil {
+		return err
+	}
+
+	return os.WriteFile(s.file, data, 0644)
 }
 
 func (s *Storage) readStorage() ([]byte, error) {
-	err := s.checkStorage()
-	if err != nil {
+	if err := s.checkStorage(); err != nil {
 		return nil, err
 	}
 
@@ -40,13 +41,11 @@ func (s *Storage) readStorage() ([]byte, error) {
 
 func (s *Storage) checkStorage() error {
 	_, err := os.ReadFile(s.file)
-
 	if err == nil {
 		return nil
 	}
 
-	err = os.MkdirAll(filepath.Dir(s.file), 0755)
-	if err != nil {
+	if err := os.MkdirAll(filepath.Dir(s.file), 0755); err != nil {
 		return err
 	}
 
@@ -69,17 +68,13 @@ func (s *Storage) getEquipmentStorage() (models.EquipmentStorage, error) {
 
 func sortStorage(storage models.EquipmentStorage) models.EquipmentStorage {
 	storage.Devices = sortDevices(storage.Devices)
-
 	for i := range storage.Devices {
-		storage.Devices[i].OperationHistory =
-			sortDeviceOperations(storage.Devices[i].OperationHistory)
+		storage.Devices[i].OperationHistory = sortDeviceOperations(storage.Devices[i].OperationHistory)
 	}
 
 	storage.Bottles = sortBottles(storage.Bottles)
-
 	for i := range storage.Bottles {
-		storage.Bottles[i].OperationHistory =
-			sortBottleOperations(storage.Bottles[i].OperationHistory)
+		storage.Bottles[i].OperationHistory = sortBottleOperations(storage.Bottles[i].OperationHistory)
 	}
 
 	return storage

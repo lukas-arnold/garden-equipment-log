@@ -5,103 +5,53 @@ import (
 	"testing"
 )
 
-func TestGetPortDefault(t *testing.T) {
+func TestGetPort(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		os.Unsetenv("PORT")
+		if got := GetPort(); got != ":8080" {
+			t.Errorf("expected :8080, got %s", got)
+		}
+	})
 
-	os.Unsetenv("PORT")
-
-	got := GetPort()
-
-	if got != ":8080" {
-		t.Fatalf(
-			"got %s",
-			got,
-		)
-	}
-}
-
-func TestGetPortEnv(t *testing.T) {
-
-	os.Setenv(
-		"PORT",
-		":9999",
-	)
-
-	defer os.Unsetenv("PORT")
-
-	got := GetPort()
-
-	if got != ":9999" {
-		t.Fatalf(
-			"got %s",
-			got,
-		)
-	}
+	t.Run("environment", func(t *testing.T) {
+		os.Setenv("PORT", ":9999")
+		defer os.Unsetenv("PORT")
+		if got := GetPort(); got != ":9999" {
+			t.Errorf("expected :9999, got %s", got)
+		}
+	})
 }
 
 func TestGetStorageFile(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		os.Unsetenv("STORAGE_FILE")
+		if got := GetStorageFile(); got != "data/strength-tracker.json" {
+			t.Errorf("expected data/strength-tracker.json, got %s", got)
+		}
+	})
 
-	os.Unsetenv("STORAGE_FILE")
-
-	got := GetStorageFile()
-
-	if got != "data/garden-equipment-log.json" {
-		t.Fatalf(
-			"got %s",
-			got,
-		)
-	}
-}
-
-func TestGetStorageFileEnv(t *testing.T) {
-
-	old := os.Getenv("STORAGE_FILE")
-	defer os.Setenv("STORAGE_FILE", old)
-
-	os.Setenv(
-		"STORAGE_FILE",
-		"/tmp/test.json",
-	)
-
-	got := GetStorageFile()
-
-	if got != "/tmp/test.json" {
-		t.Fatalf(
-			"got %s",
-			got,
-		)
-	}
+	t.Run("environment", func(t *testing.T) {
+		os.Setenv("STORAGE_FILE", "/tmp/test.json")
+		defer os.Unsetenv("STORAGE_FILE")
+		if got := GetStorageFile(); got != "/tmp/test.json" {
+			t.Errorf("expected /tmp/test.json, got %s", got)
+		}
+	})
 }
 
 func TestGetLanguage(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		os.Unsetenv("LANGUAGE")
+		if got := GetLanguage(); got != "en" {
+			t.Errorf("expected en, got %s", got)
+		}
+	})
 
-	os.Unsetenv("LANGUAGE")
-
-	got := GetLanguage()
-
-	if got != "en" {
-		t.Fatalf(
-			"got %s",
-			got,
-		)
-	}
-}
-
-func TestGetLanguageEnv(t *testing.T) {
-
-	old := os.Getenv("LANGUAGE")
-	defer os.Setenv("LANGUAGE", old)
-
-	os.Setenv(
-		"LANGUAGE",
-		"de",
-	)
-
-	got := GetLanguage()
-
-	if got != "de" {
-		t.Fatalf(
-			"got %s",
-			got,
-		)
-	}
+	t.Run("environment", func(t *testing.T) {
+		os.Setenv("LANGUAGE", "de")
+		defer os.Unsetenv("LANGUAGE")
+		if got := GetLanguage(); got != "de" {
+			t.Errorf("expected de, got %s", got)
+		}
+	})
 }

@@ -10,37 +10,16 @@ import (
 )
 
 func TestCreateServer(t *testing.T) {
+	store := storage.New(t.TempDir() + "/test.json")
+	h := handler.New(store)
+	server := createServer(h)
 
-	store :=
-		storage.New(
-			t.TempDir() + "/test.json",
-		)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
 
-	h :=
-		handler.New(store)
-
-	server :=
-		createServer(h)
-
-	req :=
-		httptest.NewRequest(
-			"GET",
-			"/",
-			nil,
-		)
-
-	rec :=
-		httptest.NewRecorder()
-
-	server.ServeHTTP(
-		rec,
-		req,
-	)
+	server.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected status OK, got %d", rec.Code)
 	}
 }

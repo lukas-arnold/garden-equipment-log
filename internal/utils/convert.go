@@ -9,17 +9,12 @@ import (
 )
 
 func ConvertEquipmentStorageToBytes(storage models.EquipmentStorage) ([]byte, error) {
-	bytes, err := json.Marshal(storage)
-	if err != nil {
-		return nil, err
-	}
-	return bytes, nil
+	return json.Marshal(storage)
 }
 
 func ConvertBytesToEquipmentStorage(bytes []byte) (models.EquipmentStorage, error) {
 	var storage models.EquipmentStorage
-	err := json.Unmarshal(bytes, &storage)
-	if err != nil {
+	if err := json.Unmarshal(bytes, &storage); err != nil {
 		return storage, err
 	}
 	return storage, nil

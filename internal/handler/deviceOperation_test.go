@@ -12,372 +12,156 @@ import (
 )
 
 func TestHandleAddDeviceOperationGet(t *testing.T) {
-
 	h := testHandler(t)
 
-	req := httptest.NewRequest(
-		"GET",
-		"/device/operation/add",
-		nil,
-	)
-
-	req.SetPathValue(
-		"deviceId",
-		"1",
-	)
-
+	req := httptest.NewRequest("GET", "/device/operation/add", nil)
+	req.SetPathValue("deviceId", "1")
 	rec := httptest.NewRecorder()
 
-	h.HandleAddDeviceOperationGet(
-		rec,
-		req,
-	)
+	h.HandleAddDeviceOperationGet(rec, req)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected status OK, got %d", rec.Code)
 	}
 }
 
 func TestHandleAddDeviceOperationPost(t *testing.T) {
-
 	h := testHandler(t)
-
-	err := h.storage.AddDevice(
-		models.DeviceInput{
-			Name: "Chainsaw",
-		},
-	)
-
+	err := h.storage.AddDevice(models.DeviceInput{Name: "Chainsaw"})
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	devices, _ := h.storage.GetDevices()
 
 	form := url.Values{}
+	form.Set("startTime", "2026-01-01 10:00")
+	form.Set("endTime", "2026-01-01 11:00")
+	form.Set("note", "test")
 
-	form.Set(
-		"startTime",
-		"2026-01-01 10:00",
-	)
-
-	form.Set(
-		"endTime",
-		"2026-01-01 11:00",
-	)
-
-	form.Set(
-		"note",
-		"test",
-	)
-
-	req := httptest.NewRequest(
-		"POST",
-		"/device/operation/add",
-		strings.NewReader(
-			form.Encode(),
-		),
-	)
-
-	req.Header.Set(
-		"Content-Type",
-		"application/x-www-form-urlencoded",
-	)
-
-	req.SetPathValue(
-		"deviceId",
-		strconv.FormatInt(
-			devices[0].Id,
-			10,
-		),
-	)
-
+	req := httptest.NewRequest("POST", "/device/operation/add", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetPathValue("deviceId", strconv.FormatInt(devices[0].Id, 10))
 	rec := httptest.NewRecorder()
 
-	h.HandleAddDeviceOperationPost(
-		rec,
-		req,
-	)
+	h.HandleAddDeviceOperationPost(rec, req)
 
 	if rec.Code != http.StatusFound {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected status Found, got %d", rec.Code)
 	}
 
-	device, _ := h.storage.GetDevice(
-		devices[0].Id,
-	)
-
+	device, _ := h.storage.GetDevice(devices[0].Id)
 	if len(device.OperationHistory) != 1 {
-		t.Fatal(
-			"operation missing",
-		)
+		t.Fatal("operation missing from history")
 	}
 }
 
 func TestHandleEditDeviceOperation(t *testing.T) {
-
 	h := testHandler(t)
-
-	h.storage.AddDevice(
-		models.DeviceInput{
-			Name: "Trimmer",
-		},
-	)
-
+	h.storage.AddDevice(models.DeviceInput{Name: "Trimmer"})
 	devices, _ := h.storage.GetDevices()
+	h.storage.AddDeviceOperation(devices[0].Id, models.DeviceOperationInput{
+		StartTime: "2026-01-01 10:00",
+		EndTime:   "2026-01-01 11:00",
+	})
 
-	h.storage.AddDeviceOperation(
-		devices[0].Id,
-		models.DeviceOperationInput{
-			StartTime: "2026-01-01 10:00",
-			EndTime:   "2026-01-01 11:00",
-		},
-	)
+	device, _ := h.storage.GetDevice(devices[0].Id)
+	opID := device.OperationHistory[0].Id
 
-	device, _ := h.storage.GetDevice(
-		devices[0].Id,
-	)
-
-	id := device.OperationHistory[0].Id
-
-	req := httptest.NewRequest(
-		"GET",
-		"/device/operation/edit",
-		nil,
-	)
-
-	req.SetPathValue(
-		"id",
-		strconv.FormatInt(id, 10),
-	)
-
+	req := httptest.NewRequest("GET", "/device/operation/edit", nil)
+	req.SetPathValue("id", strconv.FormatInt(opID, 10))
 	rec := httptest.NewRecorder()
 
-	h.HandleEditDeviceOperation(
-		rec,
-		req,
-	)
+	h.HandleEditDeviceOperation(rec, req)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected status OK, got %d", rec.Code)
 	}
 }
 
 func TestHandleEditDeviceOperationInvalidID(t *testing.T) {
-
 	h := testHandler(t)
 
-	req := httptest.NewRequest(
-		"GET",
-		"/device/operation/edit",
-		nil,
-	)
-
-	req.SetPathValue(
-		"id",
-		"abc",
-	)
-
+	req := httptest.NewRequest("GET", "/device/operation/edit", nil)
+	req.SetPathValue("id", "abc")
 	rec := httptest.NewRecorder()
 
-	h.HandleEditDeviceOperation(
-		rec,
-		req,
-	)
+	h.HandleEditDeviceOperation(rec, req)
 
 	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected InternalServerError, got %d", rec.Code)
 	}
 }
 
 func TestHandleSaveDeviceOperation(t *testing.T) {
-
 	h := testHandler(t)
-
-	h.storage.AddDevice(
-		models.DeviceInput{
-			Name: "Saw",
-		},
-	)
-
+	h.storage.AddDevice(models.DeviceInput{Name: "Saw"})
 	devices, _ := h.storage.GetDevices()
+	h.storage.AddDeviceOperation(devices[0].Id, models.DeviceOperationInput{})
 
-	h.storage.AddDeviceOperation(
-		devices[0].Id,
-		models.DeviceOperationInput{},
-	)
-
-	device, _ := h.storage.GetDevice(
-		devices[0].Id,
-	)
-
-	id := device.OperationHistory[0].Id
+	device, _ := h.storage.GetDevice(devices[0].Id)
+	opID := device.OperationHistory[0].Id
 
 	form := url.Values{}
+	form.Set("startTime", "2026-02-01 10:00")
+	form.Set("endTime", "2026-02-01 12:00")
+	form.Set("note", "updated")
 
-	form.Set(
-		"startTime",
-		"2026-02-01 10:00",
-	)
-
-	form.Set(
-		"endTime",
-		"2026-02-01 12:00",
-	)
-
-	form.Set(
-		"note",
-		"updated",
-	)
-
-	req := httptest.NewRequest(
-		"POST",
-		"/device/operation/save",
-		strings.NewReader(
-			form.Encode(),
-		),
-	)
-
-	req.Header.Set(
-		"Content-Type",
-		"application/x-www-form-urlencoded",
-	)
-
-	req.SetPathValue(
-		"id",
-		strconv.FormatInt(id, 10),
-	)
-
+	req := httptest.NewRequest("POST", "/device/operation/save", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetPathValue("id", strconv.FormatInt(opID, 10))
 	rec := httptest.NewRecorder()
 
-	h.HandleSaveDeviceOperation(
-		rec,
-		req,
-	)
+	h.HandleSaveDeviceOperation(rec, req)
 
 	if rec.Code != http.StatusFound {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected status Found, got %d", rec.Code)
 	}
 }
 
 func TestHandleSaveDeviceOperationInvalidID(t *testing.T) {
-
 	h := testHandler(t)
 
-	req := httptest.NewRequest(
-		"POST",
-		"/device/operation/save",
-		nil,
-	)
-
-	req.SetPathValue(
-		"id",
-		"abc",
-	)
-
+	req := httptest.NewRequest("POST", "/device/operation/save", nil)
+	req.SetPathValue("id", "abc")
 	rec := httptest.NewRecorder()
 
-	h.HandleSaveDeviceOperation(
-		rec,
-		req,
-	)
+	h.HandleSaveDeviceOperation(rec, req)
 
 	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected InternalServerError, got %d", rec.Code)
 	}
 }
 
 func TestHandleDeleteDeviceOperation(t *testing.T) {
-
 	h := testHandler(t)
-
-	h.storage.AddDevice(
-		models.DeviceInput{},
-	)
-
+	h.storage.AddDevice(models.DeviceInput{})
 	devices, _ := h.storage.GetDevices()
+	h.storage.AddDeviceOperation(devices[0].Id, models.DeviceOperationInput{})
 
-	h.storage.AddDeviceOperation(
-		devices[0].Id,
-		models.DeviceOperationInput{},
-	)
+	device, _ := h.storage.GetDevice(devices[0].Id)
+	opID := device.OperationHistory[0].Id
 
-	device, _ := h.storage.GetDevice(
-		devices[0].Id,
-	)
-
-	id := device.OperationHistory[0].Id
-
-	req := httptest.NewRequest(
-		"GET",
-		"/device/operation/delete",
-		nil,
-	)
-
-	req.SetPathValue(
-		"id",
-		strconv.FormatInt(id, 10),
-	)
-
+	req := httptest.NewRequest("GET", "/device/operation/delete", nil)
+	req.SetPathValue("id", strconv.FormatInt(opID, 10))
 	rec := httptest.NewRecorder()
 
-	h.HandleDeleteDeviceOperation(
-		rec,
-		req,
-	)
+	h.HandleDeleteDeviceOperation(rec, req)
 
 	if rec.Code != http.StatusFound {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected status Found, got %d", rec.Code)
 	}
 }
 
 func TestHandleDeleteDeviceOperationInvalidID(t *testing.T) {
-
 	h := testHandler(t)
 
-	req := httptest.NewRequest(
-		"GET",
-		"/device/operation/delete",
-		nil,
-	)
-
-	req.SetPathValue(
-		"id",
-		"abc",
-	)
-
+	req := httptest.NewRequest("GET", "/device/operation/delete", nil)
+	req.SetPathValue("id", "abc")
 	rec := httptest.NewRecorder()
 
-	h.HandleDeleteDeviceOperation(
-		rec,
-		req,
-	)
+	h.HandleDeleteDeviceOperation(rec, req)
 
 	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf(
-			"got %d",
-			rec.Code,
-		)
+		t.Fatalf("expected InternalServerError, got %d", rec.Code)
 	}
 }

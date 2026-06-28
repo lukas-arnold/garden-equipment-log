@@ -11,7 +11,6 @@ import (
 
 func (s *Storage) AddDevice(input models.DeviceInput) error {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return err
 	}
@@ -23,13 +22,11 @@ func (s *Storage) AddDevice(input models.DeviceInput) error {
 	}
 
 	storage.Devices = append(storage.Devices, device)
-
 	return s.saveStorage(storage)
 }
 
 func (s *Storage) GetDevices() ([]models.Device, error) {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return nil, err
 	}
@@ -42,14 +39,14 @@ func (s *Storage) GetDevices() ([]models.Device, error) {
 }
 
 func (s *Storage) GetDevice(id int64) (models.Device, error) {
-	devices, err := s.GetDevices()
-
+	storage, err := s.getEquipmentStorage()
 	if err != nil {
 		return models.Device{}, err
 	}
 
-	for _, device := range devices {
+	for _, device := range storage.Devices {
 		if device.Id == id {
+			enrichDevice(&device)
 			return device, nil
 		}
 	}
@@ -59,7 +56,6 @@ func (s *Storage) GetDevice(id int64) (models.Device, error) {
 
 func (s *Storage) GetDeviceIdByOperationId(id int64) (int64, error) {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return 0, err
 	}
@@ -71,13 +67,11 @@ func (s *Storage) GetDeviceIdByOperationId(id int64) (int64, error) {
 			}
 		}
 	}
-
 	return 0, nil
 }
 
 func (s *Storage) UpdateDevice(device models.Device) error {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return err
 	}
@@ -94,22 +88,14 @@ func (s *Storage) UpdateDevice(device models.Device) error {
 
 func (s *Storage) DeleteDevice(id int64) error {
 	storage, err := s.getEquipmentStorage()
-
 	if err != nil {
 		return err
 	}
 
-	for i := range storage.Devices {
-		if storage.Devices[i].Id == id {
-
-			storage.Devices = slices.Delete(
-				storage.Devices,
-				i,
-				i+1,
-			)
-
-			return s.saveStorage(storage)
-		}
+	idx := slices.IndexFunc(storage.Devices, func(d models.Device) bool { return d.Id == id })
+	if idx != -1 {
+		storage.Devices = slices.Delete(storage.Devices, idx, idx+1)
+		return s.saveStorage(storage)
 	}
 
 	return nil
@@ -139,13 +125,11 @@ func enrichDevice(device *models.Device) {
 	device.TotalOperationTime = totalMinutes
 
 	if totalMinutes > 0 {
-		device.PricePerHour =
-			device.PurchasePrice / (totalMinutes / 60)
+		device.PricePerHour = device.PurchasePrice / (totalMinutes / 60)
 	}
 
 	if !lastUsage.IsZero() {
-		device.LastUsageDate =
-			lastUsage.Format(time.DateOnly)
+		device.LastUsageDate = lastUsage.Format(time.DateOnly)
 	}
 }
 
@@ -157,14 +141,11 @@ func sortDevices(devices []models.Device) []models.Device {
 		if iLast != jLast {
 			return iLast > jLast
 		}
-
 		if devices[i].PurchaseDate != devices[j].PurchaseDate {
 			return devices[i].PurchaseDate > devices[j].PurchaseDate
 		}
-
 		return devices[i].Id < devices[j].Id
 	})
-
 	return devices
 }
 
@@ -172,12 +153,9 @@ func latestDeviceOperationTimestamp(device models.Device) string {
 	if len(device.OperationHistory) == 0 {
 		return device.PurchaseDate
 	}
-
 	lastOp := device.OperationHistory[0]
-
 	if lastOp.EndTime != "" {
 		return lastOp.EndTime
 	}
-
 	return lastOp.StartTime
 }
