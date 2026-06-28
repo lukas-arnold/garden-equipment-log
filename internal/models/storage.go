@@ -6,13 +6,13 @@ type EquipmentStorage struct {
 }
 
 type ChartDataset struct {
-	Label string
-	Data  []float64
-	Unit  string
+	Label string    `json:"label"`
+	Data  []float64 `json:"data"`
+	Unit  string    `json:"unit"`
 }
 
 type ChartModel struct {
-	Type   string
-	Labels []string
-	Sets   []ChartDataset
+	Type   string         `json:"type,omitempty"`
+	Labels []string       `json:"labels"`
+	Sets   []ChartDataset `json:"sets"`
 }
