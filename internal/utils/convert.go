@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"strconv"
+	"time"
 
 	"github.com/lukas-arnold/garden-equipment-log/internal/models"
 )
@@ -38,4 +39,8 @@ func ConvertFloat(floatStr string) (float64, error) {
 		return -1, err
 	}
 	return value, nil
+}
+
+func ParseDateTime(value string) (time.Time, error) {
+	return time.Parse("2006-01-02T15:04", value)
 }

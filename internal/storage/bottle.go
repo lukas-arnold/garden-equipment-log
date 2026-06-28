@@ -8,50 +8,59 @@ import (
 	"github.com/lukas-arnold/garden-equipment-log/internal/utils"
 )
 
-func AddBottle(bottle models.BottleInput) error {
-	storage, err := getEquipmentStorage()
+func (s *Storage) AddBottle(input models.BottleInput) error {
+	storage, err := s.getEquipmentStorage()
 	if err != nil {
 		return err
 	}
-	newBottle := models.Bottle{Id: utils.Id(), BottleInput: bottle, OperationHistory: []models.BottleOperation{}}
-	storage.Bottles = append(storage.Bottles, newBottle)
-	err = saveStorage(storage)
-	if err != nil {
-		return err
+
+	bottle := models.Bottle{
+		Id:               utils.Id(),
+		BottleInput:      input,
+		OperationHistory: []models.BottleOperation{},
 	}
-	return nil
+
+	storage.Bottles = append(storage.Bottles, bottle)
+
+	return s.saveStorage(storage)
 }
 
-func GetBottles() ([]models.Bottle, error) {
-	storage, err := getEquipmentStorage()
+func (s *Storage) GetBottles() ([]models.Bottle, error) {
+	storage, err := s.getEquipmentStorage()
 	if err != nil {
 		return nil, err
 	}
+
 	for i := range storage.Bottles {
 		enrichBottle(&storage.Bottles[i])
 	}
+
 	return storage.Bottles, nil
 }
 
-func GetBottle(id int64) (models.Bottle, error) {
-	bottles, err := GetBottles()
+func (s *Storage) GetBottle(id int64) (models.Bottle, error) {
+	bottles, err := s.GetBottles()
+
 	if err != nil {
 		return models.Bottle{}, err
 	}
-	var bottle models.Bottle
-	for _, value := range bottles {
-		if value.Id == id {
-			bottle = value
+
+	for _, bottle := range bottles {
+		if bottle.Id == id {
+			return bottle, nil
 		}
 	}
-	return bottle, nil
+
+	return models.Bottle{}, nil
 }
 
-func GetBottleIdByOperationId(id int64) (int64, error) {
-	storage, err := getEquipmentStorage()
+func (s *Storage) GetBottleIdByOperationId(id int64) (int64, error) {
+	storage, err := s.getEquipmentStorage()
+
 	if err != nil {
 		return 0, err
 	}
+
 	for _, bottle := range storage.Bottles {
 		for _, operation := range bottle.OperationHistory {
 			if operation.Id == id {
@@ -59,56 +68,59 @@ func GetBottleIdByOperationId(id int64) (int64, error) {
 			}
 		}
 	}
-	return 0, err
+
+	return 0, nil
 }
 
-func UpdateBottle(bottle models.Bottle) error {
-	storage, err := getEquipmentStorage()
+func (s *Storage) UpdateBottle(bottle models.Bottle) error {
+	storage, err := s.getEquipmentStorage()
+
 	if err != nil {
 		return err
 	}
+
 	for i := range storage.Bottles {
 		if storage.Bottles[i].Id == bottle.Id {
-			storage.Bottles[i].PurchaseDate = bottle.PurchaseDate
-			storage.Bottles[i].PurchasePrice = bottle.PurchasePrice
-			storage.Bottles[i].InitialWeight = bottle.InitialWeight
-			storage.Bottles[i].FillingWeight = bottle.FillingWeight
-			storage.Bottles[i].OperationHistory = bottle.OperationHistory
+			storage.Bottles[i] = bottle
+			break
 		}
 	}
-	err = saveStorage(storage)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return s.saveStorage(storage)
 }
 
-func DeleteBottle(id int64) error {
-	storage, err := getEquipmentStorage()
+func (s *Storage) DeleteBottle(id int64) error {
+	storage, err := s.getEquipmentStorage()
+
 	if err != nil {
 		return err
 	}
-	var index int
+
 	for i := range storage.Bottles {
 		if storage.Bottles[i].Id == id {
-			index = i
+			storage.Bottles = slices.Delete(
+				storage.Bottles,
+				i,
+				i+1,
+			)
+
+			return s.saveStorage(storage)
 		}
 	}
-	storage.Bottles = slices.Delete(storage.Bottles, index, index+1)
-	err = saveStorage(storage)
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
 func enrichBottle(bottle *models.Bottle) {
 	bottle.TotalOperations = len(bottle.OperationHistory)
+
 	usedGas := 0.0
+
 	if len(bottle.OperationHistory) > 0 {
 		lastWeight := bottle.OperationHistory[0].Weight
 		usedGas = bottle.InitialWeight - lastWeight
 	}
+
 	bottle.UsedGas = usedGas
 	bottle.RestGas = bottle.FillingWeight - usedGas
 }
@@ -118,7 +130,9 @@ func sortBottles(bottles []models.Bottle) []models.Bottle {
 		if bottles[i].PurchaseDate != bottles[j].PurchaseDate {
 			return bottles[i].PurchaseDate > bottles[j].PurchaseDate
 		}
+
 		return bottles[i].Id < bottles[j].Id
 	})
+
 	return bottles
 }

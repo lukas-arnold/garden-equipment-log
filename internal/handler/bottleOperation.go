@@ -2,142 +2,263 @@ package handler
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 
-	"github.com/lukas-arnold/garden-equipment-log/internal/configs"
 	"github.com/lukas-arnold/garden-equipment-log/internal/models"
-	"github.com/lukas-arnold/garden-equipment-log/internal/storage"
 	"github.com/lukas-arnold/garden-equipment-log/internal/utils"
 )
 
-func HandleBottlesView(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(
-		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/index.html"),
+func (h *Handler) HandleAddBottleOperationGet(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	bottleId, err := utils.ConvertId(
+		r.PathValue("bottleId"),
 	)
-	bottles, err := storage.GetBottles()
-	if err != nil {
-		handleError(w, err, http.StatusNotFound)
-		return
-	}
-	err = tmpl.Execute(w, bottles)
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
-}
 
-func HandleAddBottleOperationGet(w http.ResponseWriter, r *http.Request) {
-	bottleId, err := utils.ConvertId(r.PathValue("bottleId"))
 	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
 		return
 	}
-	tmpl := template.Must(
-		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/addOperation.html"),
+
+	h.renderTemplate(
+		w,
+		"templates/bottle/addOperation.html",
+		struct {
+			BottleId int64
+		}{
+			BottleId: bottleId,
+		},
 	)
-	err = tmpl.Execute(w, struct {
-		BottleId int64
-	}{BottleId: bottleId})
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
 }
 
-func HandleAddBottleOperationPost(w http.ResponseWriter, r *http.Request) {
-	bottleId, err := utils.ConvertId(r.PathValue("bottleId"))
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
-	weight, err := utils.ConvertFloat(r.FormValue("weight"))
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
-	err = storage.AddBottleOperation(bottleId, models.BottleOperationInput{
-		Date:   r.FormValue("date"),
-		Weight: weight,
-	})
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, fmt.Sprintf("/bottle/history/%d", bottleId), http.StatusFound)
-}
-
-func HandleEditBottleOperation(w http.ResponseWriter, r *http.Request) {
-	id, err := utils.ConvertId(r.PathValue("id"))
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
-	operation, err := storage.GetBottleOperation(id)
-	if err != nil {
-		handleError(w, err, http.StatusNotFound)
-		return
-	}
-	bottleId, err := storage.GetBottleIdByOperationId(id)
-	if err != nil {
-		handleError(w, err, http.StatusNotFound)
-		return
-	}
-	tmpl := template.Must(
-		template.New("base.html").Funcs(getTemplateFuncs()).ParseFS(configs.GetWebFiles(), "templates/base.html", "templates/bottle/editOperation.html"),
+func (h *Handler) HandleAddBottleOperationPost(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	bottleId, err := utils.ConvertId(
+		r.PathValue("bottleId"),
 	)
-	err = tmpl.Execute(w, struct {
-		BottleId  int64
-		Operation models.BottleOperation
-	}{BottleId: bottleId, Operation: operation})
+
 	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
 		return
 	}
+
+	weight, err := utils.ConvertFloat(
+		r.FormValue("weight"),
+	)
+
+	if err != nil {
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	err = h.storage.AddBottleOperation(
+		bottleId,
+		models.BottleOperationInput{
+			Date:   r.FormValue("date"),
+			Weight: weight,
+		},
+	)
+
+	if err != nil {
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	http.Redirect(
+		w,
+		r,
+		fmt.Sprintf(
+			"/bottle/history/%d",
+			bottleId,
+		),
+		http.StatusFound,
+	)
 }
 
-func HandleSaveBottleOperation(w http.ResponseWriter, r *http.Request) {
-	id, err := utils.ConvertId(r.PathValue("id"))
+func (h *Handler) HandleEditBottleOperation(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	id, err := utils.ConvertId(
+		r.PathValue("id"),
+	)
+
 	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
 		return
 	}
-	bottleId, err := storage.GetBottleIdByOperationId(id)
+
+	operation, err := h.storage.GetBottleOperation(id)
+
 	if err != nil {
-		handleError(w, err, http.StatusNotFound)
+		handleError(
+			w,
+			err,
+			http.StatusNotFound,
+		)
 		return
 	}
-	weight, err := utils.ConvertFloat(r.FormValue("weight"))
+
+	bottleId, err := h.storage.GetBottleIdByOperationId(id)
+
 	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
+		handleError(
+			w,
+			err,
+			http.StatusNotFound,
+		)
 		return
 	}
-	err = storage.UpdateBottleOperation(id, models.BottleOperationInput{
-		Date:   r.FormValue("date"),
-		Weight: weight,
-	})
-	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, fmt.Sprintf("/bottle/history/%d", bottleId), http.StatusFound)
+
+	h.renderTemplate(
+		w,
+		"templates/bottle/editOperation.html",
+		struct {
+			BottleId  int64
+			Operation models.BottleOperation
+		}{
+			BottleId:  bottleId,
+			Operation: operation,
+		},
+	)
 }
 
-func HandleDeleteBottleOperation(w http.ResponseWriter, r *http.Request) {
-	id, err := utils.ConvertId(r.PathValue("id"))
+func (h *Handler) HandleSaveBottleOperation(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	id, err := utils.ConvertId(
+		r.PathValue("id"),
+	)
+
 	if err != nil {
-		handleError(w, err, http.StatusInternalServerError)
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
 		return
 	}
-	bottleId, lookupErr := storage.GetBottleIdByOperationId(id)
-	err = storage.DeleteBottleOperation(id)
+
+	bottleId, err := h.storage.GetBottleIdByOperationId(id)
+
 	if err != nil {
-		handleError(w, err, http.StatusNotFound)
+		handleError(
+			w,
+			err,
+			http.StatusNotFound,
+		)
 		return
 	}
+
+	weight, err := utils.ConvertFloat(
+		r.FormValue("weight"),
+	)
+
+	if err != nil {
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	err = h.storage.UpdateBottleOperation(
+		id,
+		models.BottleOperationInput{
+			Date:   r.FormValue("date"),
+			Weight: weight,
+		},
+	)
+
+	if err != nil {
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	http.Redirect(
+		w,
+		r,
+		fmt.Sprintf(
+			"/bottle/history/%d",
+			bottleId,
+		),
+		http.StatusFound,
+	)
+}
+
+func (h *Handler) HandleDeleteBottleOperation(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	id, err := utils.ConvertId(
+		r.PathValue("id"),
+	)
+
+	if err != nil {
+		handleError(
+			w,
+			err,
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	bottleId, lookupErr :=
+		h.storage.GetBottleIdByOperationId(id)
+
+	err = h.storage.DeleteBottleOperation(id)
+
+	if err != nil {
+		handleError(
+			w,
+			err,
+			http.StatusNotFound,
+		)
+		return
+	}
+
 	redirectTarget := "/bottles"
+
 	if lookupErr == nil {
-		redirectTarget = fmt.Sprintf("/bottle/history/%d", bottleId)
+		redirectTarget = fmt.Sprintf(
+			"/bottle/history/%d",
+			bottleId,
+		)
 	}
-	http.Redirect(w, r, redirectTarget, http.StatusFound)
+
+	http.Redirect(
+		w,
+		r,
+		redirectTarget,
+		http.StatusFound,
+	)
 }

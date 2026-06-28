@@ -8,72 +8,108 @@ import (
 	"github.com/lukas-arnold/garden-equipment-log/internal/utils"
 )
 
-func AddBottleOperation(bottleId int64, operationInput models.BottleOperationInput) error {
-	bottle, err := GetBottle(bottleId)
+func (s *Storage) AddBottleOperation(
+	bottleId int64,
+	operationInput models.BottleOperationInput,
+) error {
+	bottle, err := s.GetBottle(bottleId)
+
 	if err != nil {
 		return err
 	}
-	operation := models.BottleOperation{Id: utils.Id(), BottleOperationInput: operationInput}
-	bottle.OperationHistory = append(bottle.OperationHistory, operation)
-	err = UpdateBottle(bottle)
-	if err != nil {
-		return err
+
+	operation := models.BottleOperation{
+		Id:                   utils.Id(),
+		BottleOperationInput: operationInput,
 	}
-	return nil
+
+	bottle.OperationHistory = append(
+		bottle.OperationHistory,
+		operation,
+	)
+
+	return s.UpdateBottle(bottle)
 }
 
-func GetBottleOperation(id int64) (models.BottleOperation, error) {
-	bottles, err := GetBottles()
+func (s *Storage) GetBottleOperation(
+	id int64,
+) (models.BottleOperation, error) {
+	bottles, err := s.GetBottles()
+
 	if err != nil {
 		return models.BottleOperation{}, err
 	}
-	var operation models.BottleOperation
+
 	for _, bottle := range bottles {
-		for _, value := range bottle.OperationHistory {
-			if value.Id == id {
-				operation = value
+		for _, operation := range bottle.OperationHistory {
+			if operation.Id == id {
+				return operation, nil
 			}
 		}
 	}
-	return operation, nil
+
+	return models.BottleOperation{}, nil
 }
 
-func UpdateBottleOperation(id int64, operationInput models.BottleOperationInput) error {
-	storage, err := getEquipmentStorage()
+func (s *Storage) UpdateBottleOperation(
+	id int64,
+	operationInput models.BottleOperationInput,
+) error {
+	storage, err := s.getEquipmentStorage()
+
 	if err != nil {
 		return err
 	}
+
 	for i := range storage.Bottles {
 		for j := range storage.Bottles[i].OperationHistory {
 			if storage.Bottles[i].OperationHistory[j].Id == id {
-				storage.Bottles[i].OperationHistory[j].Date = operationInput.Date
-				storage.Bottles[i].OperationHistory[j].Weight = operationInput.Weight
-				return saveStorage(storage)
+				storage.Bottles[i].OperationHistory[j].Date =
+					operationInput.Date
+
+				storage.Bottles[i].OperationHistory[j].Weight =
+					operationInput.Weight
+
+				return s.saveStorage(storage)
 			}
 		}
 	}
+
 	return nil
 }
 
-func DeleteBottleOperation(id int64) error {
-	storage, err := getEquipmentStorage()
+func (s *Storage) DeleteBottleOperation(id int64) error {
+	storage, err := s.getEquipmentStorage()
+
 	if err != nil {
 		return err
 	}
+
 	for i := range storage.Bottles {
 		for j := range storage.Bottles[i].OperationHistory {
 			if storage.Bottles[i].OperationHistory[j].Id == id {
-				storage.Bottles[i].OperationHistory = slices.Delete(storage.Bottles[i].OperationHistory, j, j+1)
-				return saveStorage(storage)
+
+				storage.Bottles[i].OperationHistory =
+					slices.Delete(
+						storage.Bottles[i].OperationHistory,
+						j,
+						j+1,
+					)
+
+				return s.saveStorage(storage)
 			}
 		}
 	}
+
 	return nil
 }
 
-func sortBottleOperations(operations []models.BottleOperation) []models.BottleOperation {
+func sortBottleOperations(
+	operations []models.BottleOperation,
+) []models.BottleOperation {
 	sort.Slice(operations, func(i, j int) bool {
 		return operations[i].Date > operations[j].Date
 	})
+
 	return operations
 }
