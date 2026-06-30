@@ -4,9 +4,19 @@
   align-items: center;
 }
 
+table {
+	width: 100%;
+	table-layout: fixed;
+}
+
 th, td {
   text-align: center; 
   vertical-align: middle;
+}
+
+td:last-child {
+	width: 20%;
+	padding: .25rem;
 }
 
 canvas {

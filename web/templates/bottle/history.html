@@ -34,7 +34,6 @@
 				<th>{{T "date"}}</th>
 				<th>{{T "weight"}}</th>
 				<th>{{T "restGas"}}</th>
-				<th>{{T "usedGas"}}</th>
 				<th>{{T "action"}}</th>
 			</tr>
 		</thead>
@@ -44,9 +43,8 @@
 				<td>
 					<div class="date">{{.Date}}</div>
 				</td>
-				<td>{{formatFloat .BottleOperation.Weight 1}}</span> kg</td>
+				<td>{{formatFloat .BottleOperation.Weight 1}} kg</td>
 				<td>{{formatFloat .RestGas 1}} kg</td>
-				<td>{{formatFloat .UsedGas 1}} kg</td>
 				<td>
 					<article>
 						<form action="/bottle-operation/edit/{{.Id}}">
@@ -62,4 +60,7 @@
 		</tbody>
 	</table>
 </div>
+<form action="/bottle-operation/add/{{.Bottle.Id}}">
+	<input type="submit" value='{{T "addOperation"}}'/>
+</form>
 {{end}}

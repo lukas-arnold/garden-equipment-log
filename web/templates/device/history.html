@@ -34,8 +34,8 @@
 			{{range .OperationRows}}
 			<tr>
 				<td>
-					<span class="datetime">{{.StartTime}}</span><br />
-					<span class="datetime">{{.EndTime}}</span>
+					<div class="datetime">{{.StartTime}}</div>
+					<div class="datetime">{{.EndTime}}</div>
 				</td>
 				<td>
 					{{formatOperationTime .Time}}
@@ -62,4 +62,7 @@
 		</tbody>
 	</table>
 </div>
+<form action="/device-operation/add/{{.Device.Id}}">
+	<input type="submit" value='{{T "addOperation"}}'/>
+</form>
 {{end}}
